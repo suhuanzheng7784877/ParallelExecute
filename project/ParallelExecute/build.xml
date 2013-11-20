@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<project name="ParallelExecute" default="jar">
+
+	<!-- 输出路径 -->
+	<property name="deploy.dir" value="target/ParallelExecute" />
+
+	<!--环境变量-->
+	<property environment="env" />
+
+	<!-- 设置输出classes路径 -->
+	<property name="classes.dir" value="${deploy.dir}/classes" />
+
+	<!-- 设置etc路径 -->
+	<property name="etc.dir" value="${deploy.dir}/etc" />
+
+	<!-- 设置log路径 -->
+	<property name="log.dir" value="${deploy.dir}/log" />
+
+	<!-- 设置jar发布路径 -->
+	<property name="lib.dir" value="${deploy.dir}/lib" />
+
+	<!-- 设置bin路径 -->
+	<property name="bin.dir" value="${deploy.dir}/bin" />
+
+	<!--Java API doc-->
+	<property name="javadoc.dir" value="${deploy.dir}/doc" />
+
+	<!--配置文件路径-->
+	<property name="resource.dir" value="../src/conf" />
+
+	<!--项目源代码-->
+	<property name="source.java.dir" value="../src" />
+
+
+
+	<!-- 设置jar文件名称 -->
+	<property name="jar.file" value="${ant.project.name}" />
+
+	<!-- 设置war文件名称 -->
+	<property name="war.file" value="${ant.project.name}" />
+
+	<!--指定ant执行的任务-->
+	<property name="target" value="jar" />
+
+
+	<!--编译时候需要依赖的lib位置 -->
+	<path id="lib.classpath">
+		<fileset dir="lib" includes="*.jar" />
+	</path>
+
+	<!-- 设置项目ClassPath位置 -->
+	<path id="project.classpath">
+		<pathelement path="${env.JAVA_HOME}/lib/tools.jar;" />
+		<path refid="lib.classpath" />
+	</path>
+
+	<!-- 清理环境 文件夹-->
+	<target name="clean">
+		<!-- 清理classes路径 -->
+		<delete dir="${classes.dir}" />
+		<!-- 清理发布路径 -->
+		<delete dir="${deploy.dir}" />
+		<!-- 清理发布路径 -->
+		<delete dir="${lib.dir}" />
+		<delete dir="${etc.dir}" />
+		<delete dir="${log.dir}" />
+		<delete dir="${classes.dir}/conf">
+		</delete>
+	</target>
+
+	<!-- 建立环境 文件夹-->
+	<target name="build-path">
+
+		<!-- 建立发布路径 -->
+		<mkdir dir="${deploy.dir}" />
+
+		<!-- 建立classes路径 -->
+		<mkdir dir="${classes.dir}" />
+
+		<!-- 建立classes路径 -->
+		<mkdir dir="${lib.dir}" />
+		<mkdir dir="${etc.dir}" />
+		<mkdir dir="${log.dir}" />
+	</target>
+
+	<!-- 编译环境 -->
+	<target name="compile" depends="clean,build-path">
+
+		<!-- javac编译 配置信息位于.properties文件中 -->
+		<javac compiler="modern" debug="on" deprecation="off" destdir="${classes.dir}" nowarn="on" srcdir="src" encoding="UTF-8">
+			<classpath refid="project.classpath" />
+		</javac>
+
+		<!-- 拷贝资源文件 -->
+		<antcall target="copy-resources" />
+
+		<!-- 生成javadoc -->
+		<!--暂时不生成doc任务-->
+		<!--
+		<antcall target="javadoc" />
+		-->
+	</target>
+
+	<!-- 生成jar文件 -->
+	<target name="jar" depends="compile,bin">
+
+		<!-- jar打包 -->
+		<jar basedir="${classes.dir}" destfile="${deploy.dir}/bin/${jar.file}.jar" />
+
+		<!-- 拷贝lib文件到jar发布路径 -->
+		<copydir src="lib" dest="./${deploy.dir}/lib" />
+		<!--
+		<copy file="${deploy.dir}/${jar.file}.jar" todir="${bin.dir}" />
+		<delete file="${deploy.dir}/${jar.file}.jar" />
+		-->
+		<!--删除classes文件夹-->
+		<delete dir="${classes.dir}">
+		
+		</delete>
+		
+
+	</target>
+
+	<!--建立bin文件夹-->
+	<target name="bin">
+		<mkdir dir="${bin.dir}" />
+	</target>
+
+	<condition property="etc.exist">
+		<and>
+			<available file="etc" type="dir" />
+		</and>
+	</condition>
+
+	<target name="etc" if="etc.exist">
+		<copydir src="etc" dest="${deploy.dir}/etc" />
+	</target>
+
+	<condition property="conf.exist">
+		<and>
+			<available file="conf" type="dir" />
+		</and>
+	</condition>
+
+	<target name="conf" if="conf.exist">
+		<copydir src="conf" dest="${deploy.dir}/conf" />
+	</target>
+
+	<target name="shell">
+		<copy file="${shell.file}" todir="${deploy.dir}" />
+	</target>
+
+	<!-- 拷贝资源文件 -->
+	<target name="copy-resources">
+		<!--
+		<mkdir dir="{classes.dir}/conf"/>
+		-->
+		<!-- 拷贝资源文件到classes路径 -->
+		<!--
+		<copy todir="${classes.dir}/conf" overwrite="yes">
+			<fileset dir="${resource.dir}" includes="**/*" />
+		</copy>
+		-->
+	</target>
+
+	<!-- 生成javadoc文件 -->
+	<target name="javadoc">
+		<!-- 建立javadoc路径 -->
+		<mkdir dir="${javadoc.dir}" />
+
+		<!-- 生成javadoc -->
+		<javadoc additionalparam="-J-Xmx128m" breakiterator="yes" classpathref="project.classpath" destdir="${javadoc.dir}" packagenames="*.*" sourcepath="${source.java.dir}" encoding="UTF-8" charset="UTF-8" />
+	</target>
+
+	<!-- 发布项目 -->
+	<target name="deploy">
+		<!-- 调用指定target -->
+		<antcall target="${target}" />
+		<antcall target="etc" />
+		<antcall target="conf" />
+		<antcall target="shell" />
+	</target>
+</project>
