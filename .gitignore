@@ -4,3 +4,7 @@
 *.jar
 *.war
 *.ear
+/project/ParallelExecute/src/main/java/org/para/distributed/protobuf
+/project/ParallelExecute/src/main/java/org/para/distributed/worker
+/project/ParallelExecute/src/main/java/org/para/distributed/mongodb
+/project/ParallelExecute/src/main/java/org/para/distributed/mq
