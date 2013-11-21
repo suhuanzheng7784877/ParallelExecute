@@ -1,10 +1,13 @@
 package org.para.distributed.master;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.para.constant.ParaConstant;
+import org.para.distributed.dto.WorkerNode;
 import org.para.enums.TaskCycle;
 import org.para.exception.ParallelException;
 import org.para.execute.model.JobProperty;
@@ -15,83 +18,29 @@ import org.para.util.MessageOutUtil;
 
 /**
  * 分布式任务抽象模板父类
- *
+ * 
  * @author liuyan
  * @Email:suhuanzheng7784877@163.com
  * @version 0.1
  * @Date: 2013-11-16 下午6:20:49
  * @Copyright: 2013 story All rights reserved.
- *
+ * 
  * @param <T>
  */
 public abstract class DistributedParallelExecute<T extends Serializable> {
-	
-<<<<<<< HEAD
-	
-	
-	
-=======
 
-
->>>>>>> 0f9fbb7e7345c928135127e8ef087d67d6b15c50
 	public CountDownLatch countDownLatch = null;
 
 	/**
-	 * exe big Paralle Job template
-	 * <p>
-	 * same this.exeParalleJob(sourceObject, blockNum, 0, null, objects)
+	 * init job about some prepare work
 	 * 
-	 * @param sourceObject
-	 * @param blockNum
 	 * @param objects
-	 * @return
-	 * @throws ParallelException
 	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
-			Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, 0, null, objects);
-	}
-
-	/**
-	 * exe big Paralle Job template
-	 * <p>
-	 * same return this.exeParalleJob(sourceObject, blockNum, timeOut,
-	 * null,objects);
-	 * 
-	 * @param sourceObject
-	 * @param blockNum
-	 * @param objects
-	 * @return
-	 * @throws ParallelException
-	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
-			long timeOut, Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, timeOut, null,
-				objects);
-	}
-
-	/**
-	 * exe big Paralle Job template
-	 * <p>
-	 * same return this.exeParalleJob(sourceObject, blockNum, 0,
-	 * failEventListener,objects);
-	 * 
-	 * @param sourceObject
-	 * @param blockNum
-	 * @param failEventListener
-	 * @param objects
-	 * @return
-	 * @throws ParallelException
-	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
-			FailEventListener failEventListener, Object... objects)
-			throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, 0, failEventListener,
-				objects);
-	}
+	protected abstract void init(T sourceObject, Object... objects);
 
 	/**
 	 * exe big Paralle Job template,this is croe execute logic
+	 * 
 	 * @param sourceObject
 	 * @param blockNum
 	 * @param timeOut
@@ -103,11 +52,12 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 	public JobProperty exeParalleJob(T sourceObject, int blockNum,
 			long timeOut, FailEventListener failEventListener,
 			Object... objects) throws ParallelException {
-		init(sourceObject,objects);
+		init(sourceObject, objects);
 		long jobId = System.nanoTime();
 		TaskProperty[] taskPropertyArray = splitJob(sourceObject, blockNum);
 		countDownLatch = new CountDownLatch(taskPropertyArray.length);
-		execute(taskPropertyArray, sourceObject, failEventListener, objects);
+		execute(jobId, taskPropertyArray, sourceObject, failEventListener,
+				objects);
 		try {
 
 			if (timeOut > 0) {
@@ -120,13 +70,6 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 		}
 		return joinJob(jobId, taskPropertyArray);
 	}
-
-	/**
-	 * init job about some prepare work
-	 * 
-	 * @param objects
-	 */
-	protected abstract void init(T sourceObject,Object... objects);
 
 	/**
 	 * split big Job to TaskProperty Arrys
@@ -172,28 +115,6 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 	protected abstract int analyzeResultCount(T srcObject);
 
 	/**
-	 * execute Parallel task
-	 * 
-	 * @param taskPropertyArray
-	 * @param targetObject
-	 * @param failEventListener
-	 * @param objects
-	 */
-	private void execute(TaskProperty[] taskPropertyArray, T targetObject,
-			FailEventListener failEventListener, Object... objects) {
-		ParallelTask<T> parallelTask = null;
-
-		int taskPropertyArrayLength = taskPropertyArray.length;
-		for (int i = 0; i < taskPropertyArrayLength; i++) {
-			taskPropertyArray[i].setTaskCycle(TaskCycle.TASK_RUNNING);
-			parallelTask = buildParallelTask(countDownLatch,
-					taskPropertyArray[i], targetObject, failEventListener,
-					objects);
-			new Thread(parallelTask).start();
-		}
-	}
-
-	/**
 	 * build one Parallel Task
 	 * 
 	 * @param countDownLatch
@@ -206,6 +127,52 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 	protected abstract ParallelTask<T> buildParallelTask(
 			CountDownLatch countDownLatch, TaskProperty taskProperty,
 			T srcObject, FailEventListener failEventListener, Object... objects);
+
+	/**
+	 * execute Parallel task
+	 * 
+	 * @param taskPropertyArray
+	 * @param targetObject
+	 * @param failEventListener
+	 * @param objects
+	 */
+	private void execute(long jobId, TaskProperty[] taskPropertyArray,
+			T targetObject, FailEventListener failEventListener,
+			Object... objects) {
+
+		int taskPropertyArrayLength = taskPropertyArray.length;
+
+		List<ParallelTask<?>> taskList = new CopyOnWriteArrayList<ParallelTask<?>>();
+		ParallelTask<?> parallelTask = null;
+		for (int i = 0; i < taskPropertyArrayLength; i++) {
+			taskPropertyArray[i].setTaskCycle(TaskCycle.TASK_RUNNING);
+			parallelTask = buildParallelTask(countDownLatch,
+					taskPropertyArray[i], targetObject, failEventListener,
+					objects);
+			taskList.add(parallelTask);
+		}
+
+		DistributedTaskManagers.putParallelTaskList(jobId, taskList);
+		distributeTasks(taskList);
+	}
+
+	/**
+	 * 分发任务
+	 * 
+	 * @param taskList
+	 */
+	private void distributeTasks(List<ParallelTask<?>> taskList) {
+
+		// 并行度
+		int parallelNum = taskList.size();
+
+		// 选出最靠前的几个节点
+		List<WorkerNode> workerNodeList = WorkerManagers
+				.selectTopFreeWorkerNode(parallelNum);
+		
+		//TODO:拼装mq任务
+
+	}
 
 	/**
 	 * final collect execute result
@@ -235,7 +202,8 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 		}
 		StringBuilder sb = new StringBuilder(128);
 
-		sb.append("job:").append(jobId).append(":execute job result [")
+		sb.append("Distributed job:").append(jobId)
+				.append(":execute Distributed job result [")
 				.append(executeResult).append("],countTaskNum=")
 				.append(countTaskNum).append(",successTaskNum=")
 				.append(successTaskNum).append(",errorTaskNum=")
@@ -248,6 +216,5 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 
 		return jobProperty;
 	}
-
 
 }

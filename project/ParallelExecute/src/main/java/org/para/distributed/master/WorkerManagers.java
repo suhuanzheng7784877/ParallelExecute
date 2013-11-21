@@ -32,7 +32,7 @@ public class WorkerManagers {
 	 *            ,选择几个节点
 	 * @return
 	 */
-	public static List<WorkerNode> selectTopFreeWorkerNode(int topN) {
+	public static List<WorkerNode> selectTopFreeWorkerNode(int parallelNum) {
 
 		List<WorkerNode> list = new ArrayList<WorkerNode>(workerNodes);
 		int listSize = list.size();
@@ -42,20 +42,20 @@ public class WorkerManagers {
 
 		// 所有可用节点的个数
 		int allWorkerNodesSize = listSize;
-		if (topN <= 0) {
+		if (parallelNum <= 0) {
 
 			// 非法参数，设为1
-			topN = 1;
-		} else if (topN >= listSize) {
+			parallelNum = 1;
+		} else if (parallelNum >= listSize) {
 
 			// 非法参数，设为所有可用节点的个数
-			topN = allWorkerNodesSize;
+			parallelNum = allWorkerNodesSize;
 		}
 
 		// 重新执行负载均衡，重新对资源池进行排序
 		reBlance(list);
 
-		return list.subList(0, topN);
+		return list.subList(0, parallelNum);
 	}
 
 	/**

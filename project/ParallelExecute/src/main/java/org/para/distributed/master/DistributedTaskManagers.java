@@ -19,7 +19,16 @@ import org.para.execute.task.ParallelTask;
 public class DistributedTaskManagers {
 
 	// 并行任务的暂存区域
-	public final static Map<String, List<ParallelTask<?>>> distributedParallelTaskMap = new ConcurrentHashMap<String, List<ParallelTask<?>>>(
+	private final static Map<Long, List<ParallelTask<?>>> distributedParallelTaskMap = new ConcurrentHashMap<Long, List<ParallelTask<?>>>(
 			64, 0.75F);
+	
+	/**
+	 * 添加任务
+	 * @param key
+	 * @param taskList
+	 */
+	public static void putParallelTaskList(Long key,List<ParallelTask<?>> taskList){
+		distributedParallelTaskMap.put(key, taskList);
+	}
 
 }
