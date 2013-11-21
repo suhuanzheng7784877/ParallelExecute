@@ -1,5 +1,6 @@
 package org.para.execute.task;
 
+import java.io.Serializable;
 import java.util.concurrent.CountDownLatch;
 
 import org.para.enums.TaskCycle;
@@ -15,8 +16,13 @@ import org.para.trace.listener.FailEventListener;
  * @Date: 2013-8-23
  * @Copyright: 2013 story All rights reserved.
  */
-public abstract class ParallelTask<T> implements Runnable {
+public abstract class ParallelTask<T> implements Runnable,Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	protected TaskProperty taskProperty = null;
 	protected T targetObject = null;
 	protected CountDownLatch countDownLatch = null;

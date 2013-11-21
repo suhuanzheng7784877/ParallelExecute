@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.para.constant.ParaConstant;
 import org.para.distributed.dto.WorkerNode;
+import org.para.distributed.mq.TaskTargetWorker;
 import org.para.enums.TaskCycle;
 import org.para.exception.ParallelException;
 import org.para.execute.model.JobProperty;
@@ -153,15 +154,15 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 		}
 
 		DistributedTaskManagers.putParallelTaskList(jobId, taskList);
-		distributeTasks(taskList);
+		distributeTasks(jobId,taskList);
 	}
 
 	/**
-	 * 分发任务
-	 * 
+	 * 分发任务逻辑
+	 * @param jobId
 	 * @param taskList
 	 */
-	private void distributeTasks(List<ParallelTask<?>> taskList) {
+	private void distributeTasks(long jobId,List<ParallelTask<?>> taskList) {
 
 		// 并行度
 		int parallelNum = taskList.size();
@@ -170,8 +171,21 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 		List<WorkerNode> workerNodeList = WorkerManagers
 				.selectTopFreeWorkerNode(parallelNum);
 		
+		//候选节点的个数
+		int workerNodeListSize = workerNodeList.size();
+		
 		//TODO:拼装mq任务
-
+		TaskTargetWorker[] taskTargetWorker = new TaskTargetWorker[workerNodeListSize];
+		
+		if(workerNodeListSize == parallelNum){
+			//备选结点机器个数=任务分发个数
+			
+			
+			
+		}
+		
+		
+		
 	}
 
 	/**
