@@ -25,15 +25,7 @@ import org.para.util.MessageOutUtil;
  * @param <T>
  */
 public abstract class DistributedParallelExecute<T extends Serializable> {
-	
-<<<<<<< HEAD
-	
-	
-	
-=======
 
-
->>>>>>> 0f9fbb7e7345c928135127e8ef087d67d6b15c50
 	public CountDownLatch countDownLatch = null;
 
 	/**
