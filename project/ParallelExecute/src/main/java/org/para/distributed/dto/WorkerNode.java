@@ -42,7 +42,7 @@ public class WorkerNode implements Serializable {
 	 * @param cpu持久空闲率
 	 *            :cpufreerate
 	 */
-	public WorkerNode(String workerIp, int freedisk, Integer freememroy,
+	public WorkerNode(String workerIp, int freedisk, int freememroy,
 			long createtime, long lasthearttime, float cpufreerate) {
 		super();
 		this.workerIp = workerIp;
@@ -66,7 +66,7 @@ public class WorkerNode implements Serializable {
 	/**
 	 * 剩余内存
 	 */
-	private Integer freememroy;
+	private int freememroy;
 
 	/**
 	 * 创建时间
@@ -103,7 +103,7 @@ public class WorkerNode implements Serializable {
 		return freememroy;
 	}
 
-	public void setFreememroy(Integer freememroy) {
+	public void setFreememroy(int freememroy) {
 		this.freememroy = freememroy;
 	}
 

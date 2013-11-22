@@ -1,6 +1,7 @@
 package org.para.distributed.mq;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * 分发到mq的消息实体
@@ -69,6 +70,12 @@ public class DistributedTaskMessage implements Serializable {
 
 	public void setTaskTargetWorker(TaskTargetWorker[] taskTargetWorker) {
 		this.taskTargetWorker = taskTargetWorker;
+	}
+
+	@Override
+	public String toString() {
+		return "DistributedTaskMessage [jobId=" + jobId + ", taskTargetWorker="
+				+ Arrays.toString(taskTargetWorker) + "]";
 	}
 
 }

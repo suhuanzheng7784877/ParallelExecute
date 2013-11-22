@@ -18,10 +18,10 @@ import org.para.execute.task.ParallelTask;
 public class TaskTargetWorker implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private WorkerNode workerNode;
 
 	private List<ParallelTask<?>> parallelTaskList;
-
-	private WorkerNode workerNode;
 
 	public TaskTargetWorker() {
 		super();
@@ -48,6 +48,12 @@ public class TaskTargetWorker implements Serializable {
 
 	public void setWorkerNode(WorkerNode workerNode) {
 		this.workerNode = workerNode;
+	}
+
+	@Override
+	public String toString() {
+		return "TaskTargetWorker [workerNode=" + workerNode
+				+ ", parallelTaskList=" + parallelTaskList + "]";
 	}
 
 }
