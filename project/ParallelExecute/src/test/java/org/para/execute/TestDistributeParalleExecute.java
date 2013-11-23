@@ -10,6 +10,7 @@ import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.master.DistributedParallelExecute;
 import org.para.distributed.master.WorkerManagers;
 import org.para.distributed.mq.DistributedTaskMessage;
+import org.para.distributed.util.MQMessageBuilder;
 import org.para.execute.model.TaskProperty;
 import org.para.execute.task.ParallelTask;
 import org.para.file.task.ByteCopyFileParallelTask;
@@ -25,12 +26,9 @@ public class TestDistributeParalleExecute {
 
 		WorkerNode workerNode2 = new WorkerNode("192.168.1.2", 1000, 512, 2L,
 				1L, 0.8F);
-		WorkerNode workerNode3 = new WorkerNode("192.168.1.3", 1000, 512, 2L,
-				1L, 0.9F);
 
 		WorkerManagers.addWorkerNode(workerNode1);
 		WorkerManagers.addWorkerNode(workerNode2);
-		WorkerManagers.addWorkerNode(workerNode3);
 
 		// 选出最靠前的几个节点
 		List<WorkerNode> workerNodeList = WorkerManagers
@@ -55,8 +53,8 @@ public class TestDistributeParalleExecute {
 		taskList.add(byteCopyFileParallelTask3);
 		taskList.add(byteCopyFileParallelTask4);
 
-		DistributedTaskMessage distributedTaskMessage = testDistributedParallelExecute
-				.distributeTasks(1111111L, taskList);
+		DistributedTaskMessage distributedTaskMessage = MQMessageBuilder
+				.buildDistributeTasks(11111L, taskList);
 		System.out.println(distributedTaskMessage);
 	}
 

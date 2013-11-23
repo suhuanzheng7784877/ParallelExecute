@@ -1,16 +1,14 @@
 package org.para.distributed.master;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.para.constant.ParaConstant;
-import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.mq.DistributedTaskMessage;
-import org.para.distributed.mq.TaskTargetWorker;
+import org.para.distributed.util.MQMessageBuilder;
 import org.para.enums.TaskCycle;
 import org.para.exception.ParallelException;
 import org.para.execute.model.JobProperty;
@@ -155,83 +153,14 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 			taskList.add(parallelTask);
 		}
 
+		// 任务池暂存任务
 		DistributedTaskManagers.putParallelTaskList(jobId, taskList);
-		distributeTasks(jobId, taskList);
-	}
 
-	/**
-	 * 分发任务逻辑
-	 * 
-	 * @param jobId
-	 * @param taskList
-	 */
-	public DistributedTaskMessage distributeTasks(long jobId,
-			List<ParallelTask<?>> taskList) {
+		// 构建分布式驱动消息
+		DistributedTaskMessage distributedTaskMessage = MQMessageBuilder
+				.buildDistributeTasks(jobId, taskList);
 
-		DistributedTaskMessage distributedTaskMessage = null;
-
-		// 并行度
-		int parallelNum = taskList.size();
-
-		// 选出最靠前的几个节点
-		List<WorkerNode> workerNodeList = WorkerManagers
-				.selectTopFreeWorkerNode(parallelNum);
-
-		// 候选节点的个数
-		int workerNodeListSize = workerNodeList.size();
-
-		// TODO:拼装mq任务
-		TaskTargetWorker[] taskTargetWorkerArray = new TaskTargetWorker[workerNodeListSize];
-		TaskTargetWorker taskTargetWorker = null;
-		WorkerNode workerNode = null;
-		ParallelTask<?> parallelTask = null;
-		if (workerNodeListSize == parallelNum) {
-			// 备选结点机器个数=任务分发个数
-			for (int i = 0; i < parallelNum; i++) {
-				parallelTask = taskList.get(i);
-				workerNode = workerNodeList.get(i);
-
-				List<ParallelTask<?>> parallelTaskList = new ArrayList<ParallelTask<?>>(
-						1);
-				parallelTaskList.add(parallelTask);
-
-				taskTargetWorker = new TaskTargetWorker(parallelTaskList,
-						workerNode);
-				taskTargetWorkerArray[i] = taskTargetWorker;
-			}
-
-		} else if (workerNodeListSize < parallelNum) {
-			// 备选结点机器个数<任务分发个数
-
-			int taskTargetWorkerArrayIndex = 0;
-			for (int i = 0; i < parallelNum; i++, taskTargetWorkerArrayIndex++) {
-
-				parallelTask = taskList.get(i);
-				if (i >= workerNodeListSize) {
-					taskTargetWorkerArrayIndex = i - workerNodeListSize;
-					taskTargetWorker = taskTargetWorkerArray[taskTargetWorkerArrayIndex];
-					taskTargetWorker.getParallelTaskList().add(parallelTask);
-				} else {
-					workerNode = workerNodeList.get(taskTargetWorkerArrayIndex);
-
-					List<ParallelTask<?>> parallelTaskList = new ArrayList<ParallelTask<?>>(
-							3);
-
-					parallelTaskList.add(parallelTask);
-					taskTargetWorker = new TaskTargetWorker(parallelTaskList,
-							workerNode);
-					taskTargetWorkerArray[taskTargetWorkerArrayIndex] = taskTargetWorker;
-				}
-
-			}
-
-		} else {
-			// 中间挑选备选节点，以及任务并行度个数，出错了.不可能出现备选节点个数小于任务并行度的情况
-		}
-		distributedTaskMessage = new DistributedTaskMessage(jobId,
-				taskTargetWorkerArray);
-
-		return distributedTaskMessage;
+		// 调用mq接口进行分发
 	}
 
 	/**
