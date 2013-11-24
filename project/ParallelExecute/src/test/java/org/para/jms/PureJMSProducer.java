@@ -79,7 +79,7 @@ public class PureJMSProducer {
 
 			connection = connectionFactory.createConnection();
 			connection.start();
-			session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 			Topic topic = session.createTopic("MyTopic");
 
