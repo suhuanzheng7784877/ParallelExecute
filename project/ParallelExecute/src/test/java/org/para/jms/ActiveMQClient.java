@@ -1,6 +1,8 @@
 package org.para.jms;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -12,14 +14,21 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.broker.BrokerFactory;
+import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.command.ActiveMQTopic;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ActiveMQClient {
+	private static final Log LOG = LogFactory.getLog(ActiveMQClient.class);
 
 	public static void main(String[] args) throws IOException {
 
 		// -- http://dlc.sun.com/pdf//816-5904-10/816-5904-10.pdf
 		try {
+			
+			
 			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(
 					"tcp://localhost:61616");
 			// ActiveMQConnectionFactory factory = new
@@ -29,7 +38,7 @@ public class ActiveMQClient {
 
 			// create message topic
 			
-			Session session = connection.createSession(false,
+			Session session = connection.createSession(true,
 					Session.AUTO_ACKNOWLEDGE);
 			Topic topic = session.createTopic("MyTopic");
 			// register message consumer

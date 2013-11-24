@@ -42,7 +42,6 @@ public class PureJMSProducer {
 	 *            messages to send
 	 */
 	public static void main(String[] args) {
-		Context jndiContext = null;
 		ConnectionFactory connectionFactory = null;
 		Connection connection = null;
 		Session session = null;
@@ -67,7 +66,6 @@ public class PureJMSProducer {
 		/*
 		 * Look up connection factory and destination.
 		 */
-
 		connectionFactory = new ActiveMQConnectionFactory(
 				"tcp://localhost:61616");
 
@@ -78,13 +76,13 @@ public class PureJMSProducer {
 		 * Finally, close connection.
 		 */
 		try {
-			
+
 			connection = connectionFactory.createConnection();
 			connection.start();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			
+			session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+
 			Topic topic = session.createTopic("MyTopic");
-			
+
 			producer = session.createProducer(topic);
 			TextMessage message = session.createTextMessage();
 			for (int i = 0; i < numMsgs; i++) {
