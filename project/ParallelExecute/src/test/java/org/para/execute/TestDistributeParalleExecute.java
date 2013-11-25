@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
+import org.para.constant.MQConstant;
 import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.master.DistributedParallelExecute;
 import org.para.distributed.master.WorkerManagers;
 import org.para.distributed.mq.DistributedTaskMessage;
 import org.para.distributed.util.MQMessageBuilder;
+import org.para.distributed.util.MQSender;
 import org.para.execute.model.TaskProperty;
 import org.para.execute.task.ParallelTask;
 import org.para.file.task.ByteCopyFileParallelTask;
@@ -56,6 +58,15 @@ public class TestDistributeParalleExecute {
 		DistributedTaskMessage distributedTaskMessage = MQMessageBuilder
 				.buildDistributeTasks(11111L, taskList);
 		System.out.println(distributedTaskMessage);
+		// 调用mq接口进行分发
+
+		for (int i = 0; i < 100; i++) {
+			MQSender mqSender = new MQSender();
+			mqSender.sendTopicMessage(
+					MQConstant.START_DISTRIBUTED_TASK_TOPIC_Destination,
+					distributedTaskMessage);
+		}
+
 	}
 
 }

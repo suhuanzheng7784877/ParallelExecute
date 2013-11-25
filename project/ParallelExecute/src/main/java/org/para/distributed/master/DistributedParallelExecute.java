@@ -6,9 +6,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.para.constant.MQConstant;
 import org.para.constant.ParaConstant;
 import org.para.distributed.mq.DistributedTaskMessage;
 import org.para.distributed.util.MQMessageBuilder;
+import org.para.distributed.util.MQSender;
 import org.para.enums.TaskCycle;
 import org.para.exception.ParallelException;
 import org.para.execute.model.JobProperty;
@@ -161,6 +163,10 @@ public abstract class DistributedParallelExecute<T extends Serializable> {
 				.buildDistributeTasks(jobId, taskList);
 
 		// 调用mq接口进行分发
+		MQSender mqSender = new MQSender();
+		mqSender.sendTopicMessage(
+				MQConstant.START_DISTRIBUTED_TASK_TOPIC_Destination,
+				distributedTaskMessage);
 	}
 
 	/**

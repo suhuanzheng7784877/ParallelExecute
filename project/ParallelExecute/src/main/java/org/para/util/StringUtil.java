@@ -2,6 +2,9 @@ package org.para.util;
 
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
 /**
  * 
  * String some util Method
@@ -15,6 +18,11 @@ import java.util.UUID;
  */
 public class StringUtil {
 	
+	private static Logger logger = Logger.getLogger(StringUtil.class);
+	
+	// 操作系统类型
+	private final static String osType = System.getProperty("os.name");
+	
 	/**
 	 * generate UUID String
 	 * @return
@@ -24,6 +32,29 @@ public class StringUtil {
 		UUID uuid = UUID.randomUUID();
 		String uuidString = uuid.toString();
 		return uuidString;
+	}
+	
+	/**
+	 * 判断操作系统的类型
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean OSisLinux() throws RuntimeException {
+
+		if (StringUtils.isBlank(osType)) {
+			RuntimeException exception = new RuntimeException("osType is null");
+			logger.error("error", exception);
+			throw exception;
+		}
+
+		if (osType.startsWith("Windows")) {
+			// 按照windows
+			return false;
+		} else {
+			// 按照linux进行
+			return true;
+		}
 	}
 
 }

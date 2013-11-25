@@ -28,24 +28,30 @@ public class MQSender {
 
 	private static final Log LOG = LogFactory.getLog(MQSender.class);
 
-	private static ConnectionFactory connectionFactory = null;
-	private static Connection connection = null;
-	private static Session session = null;
+	// TODO:写入配置
+	protected final static ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
+			"tcp://localhost:61616");
 
-	static {
+	protected Connection senderConnection = null;
+	protected Session session = null;
 
-		// TODO:写入配置
-		connectionFactory = new ActiveMQConnectionFactory(
-				"tcp://localhost:61616");
+	public MQSender() {
+		init();
+	}
+
+	/**
+	 * 初始化
+	 */
+	protected void init() {
 		try {
-			connection = connectionFactory.createConnection();
-			connection.start();
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			senderConnection = connectionFactory.createConnection();
+			senderConnection.start();
+			session = senderConnection.createSession(false,
+					Session.AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
 			e.printStackTrace();
 			LOG.error("error", e);
 		}
-
 	}
 
 	/**
@@ -58,13 +64,14 @@ public class MQSender {
 	 * @return
 	 * @throws JMSException
 	 */
-	public static boolean sendTopicMessage(String topicName,
-			Serializable messageObject) {
+	public boolean sendTopicMessage(String topicName, Serializable messageObject) {
 		Topic topic = null;
 		try {
 			topic = session.createTopic(topicName);
 			MessageProducer producer = session.createProducer(topic);
 			ObjectMessage objectMessage = session.createObjectMessage();
+			objectMessage.setObject(messageObject);
+			LOG.info("send message:" + objectMessage);
 			producer.send(objectMessage);
 			return true;
 		} catch (JMSException e) {
@@ -75,6 +82,7 @@ public class MQSender {
 			if (session != null) {
 				try {
 					session.close();
+					senderConnection.close();
 				} catch (JMSException e) {
 					LOG.error("error", e);
 					return false;

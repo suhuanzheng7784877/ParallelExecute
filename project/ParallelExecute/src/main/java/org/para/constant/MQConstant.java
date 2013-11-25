@@ -15,11 +15,11 @@ public class MQConstant {
 	/**
 	 * 发送任务的-topic
 	 */
-	public final String SEND_TASKS_TOPIC = "SEND_TASKS_TOPIC";
+	public final static String START_DISTRIBUTED_TASK_TOPIC_Destination = "Start_Distributed_Task_Topic";
 
 	/**
 	 * 子节点执行任务后的反馈-目标
 	 */
-	public final String RESPONSE_TASKS_QUEUE = "RESPONSE_TASKS_TOPIC";
+	public final static String RESPONSE_TASKS_Queue = "RESPONSE_TASKS_Queue";
 
 }

@@ -22,7 +22,7 @@ public class WorkerNode implements Serializable {
 	/**
 	 * 节点机器相关信息
 	 */
-	public WorkerNode() {
+	private WorkerNode() {
 		super();
 	}
 
@@ -42,7 +42,7 @@ public class WorkerNode implements Serializable {
 	 * @param cpu持久空闲率
 	 *            :cpufreerate
 	 */
-	public WorkerNode(String workerIp, int freedisk, int freememroy,
+	private WorkerNode(String workerIp, long freedisk, long freememroy,
 			long createtime, long lasthearttime, float cpufreerate) {
 		super();
 		this.workerIp = workerIp;
@@ -53,6 +53,18 @@ public class WorkerNode implements Serializable {
 		this.cpufreerate = cpufreerate;
 	}
 
+	private static WorkerNode workerNode = null;
+
+	public static synchronized WorkerNode getSingle() {
+
+	}
+
+	public static synchronized WorkerNode getSingle(String workerIp,
+			long freedisk, long freememroy, long createtime,
+			long lasthearttime, float cpufreerate) {
+
+	}
+
 	/**
 	 * 节点ip
 	 */
@@ -61,12 +73,12 @@ public class WorkerNode implements Serializable {
 	/**
 	 * 剩余硬盘
 	 */
-	private int freedisk;
+	private long freedisk;
 
 	/**
 	 * 剩余内存
 	 */
-	private int freememroy;
+	private long freememroy;
 
 	/**
 	 * 创建时间
@@ -91,19 +103,19 @@ public class WorkerNode implements Serializable {
 		this.workerIp = workerIp;
 	}
 
-	public int getFreedisk() {
+	public long getFreedisk() {
 		return freedisk;
 	}
 
-	public void setFreedisk(int freedisk) {
+	public void setFreedisk(long freedisk) {
 		this.freedisk = freedisk;
 	}
 
-	public Integer getFreememroy() {
+	public long getFreememroy() {
 		return freememroy;
 	}
 
-	public void setFreememroy(int freememroy) {
+	public void setFreememroy(long freememroy) {
 		this.freememroy = freememroy;
 	}
 
