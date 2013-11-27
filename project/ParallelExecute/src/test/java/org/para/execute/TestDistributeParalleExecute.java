@@ -21,13 +21,15 @@ import org.para.trace.listener.FailEventListener;
 public class TestDistributeParalleExecute {
 
 	@Test
-	public void testDistributeTasks() {
+	public void testDistributeTasks() throws CloneNotSupportedException {
 
-		WorkerNode workerNode1 = new WorkerNode("192.168.1.1", 55, 128, 1L, 1L,
-				0.9F);
+		WorkerNode workerNode1 = WorkerNode.getSingle("192.168.1.1", 55, 128,
+				1L, 1L, 0.9F);
 
-		WorkerNode workerNode2 = new WorkerNode("192.168.1.2", 1000, 512, 2L,
-				1L, 0.8F);
+		WorkerNode workerNode2 = (WorkerNode) workerNode1.clone();
+		workerNode2.setWorkerIp("192.168.1.2");
+		workerNode2.setFreememroy(512);
+		workerNode2.setCpufreerate(0.8F);
 
 		WorkerManagers.addWorkerNode(workerNode1);
 		WorkerManagers.addWorkerNode(workerNode2);

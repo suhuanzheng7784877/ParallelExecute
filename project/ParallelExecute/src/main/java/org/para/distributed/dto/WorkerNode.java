@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @Copyright: 2013 story All rights reserved.
  * 
  */
-public class WorkerNode implements Serializable {
+public class WorkerNode implements Serializable, Cloneable {
 
 	/**
 	 * 
@@ -56,13 +56,23 @@ public class WorkerNode implements Serializable {
 	private static WorkerNode workerNode = null;
 
 	public static synchronized WorkerNode getSingle() {
+		if (null == workerNode) {
+			workerNode = new WorkerNode();
+		}
 
+		return workerNode;
 	}
 
 	public static synchronized WorkerNode getSingle(String workerIp,
 			long freedisk, long freememroy, long createtime,
 			long lasthearttime, float cpufreerate) {
 
+		if (null == workerNode) {
+			workerNode = new WorkerNode(workerIp, freedisk, freememroy,
+					createtime, lasthearttime, cpufreerate);
+		}
+
+		return workerNode;
 	}
 
 	/**
@@ -167,6 +177,11 @@ public class WorkerNode implements Serializable {
 		} else if (!workerIp.equals(other.workerIp))
 			return false;
 		return true;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 
 	@Override

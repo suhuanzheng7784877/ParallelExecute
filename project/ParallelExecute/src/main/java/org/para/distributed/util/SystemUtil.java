@@ -37,7 +37,7 @@ public final class SystemUtil {
 	 * 本机node的ip地址
 	 */
 	public volatile static String localIP = null;
-	
+
 	public static final int kb = 1024 * 1024;
 
 	/**
@@ -76,8 +76,8 @@ public final class SystemUtil {
 	public static WorkerNode getWorkerNode(boolean isRegister)
 			throws UnknownHostException {
 
-		WorkerNode workerNode = new WorkerNode();
-
+		WorkerNode workerNode = WorkerNode.getSingle();
+		
 		// 本机器IP
 		String localIp = getIP();
 
@@ -236,7 +236,7 @@ public final class SystemUtil {
 	 * @return
 	 */
 	public static long getFreeMemroy() {
-		
+
 		OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
 				.getOperatingSystemMXBean();
 
