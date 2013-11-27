@@ -40,7 +40,9 @@ public abstract class MQReceiver<T extends Serializable> {
 	private Connection receiverConnection = null;
 	private Session session = null;
 
-	private final static long Sleep_Interval = 5 * 60 * 1000L;
+	private final static long interval = Long.parseLong(PropertiesUtil
+			.getValue("server.sleep.interval"));
+
 	protected volatile boolean IS_STOP_Receiver = true;
 
 	public MQReceiver() {
@@ -104,7 +106,7 @@ public abstract class MQReceiver<T extends Serializable> {
 			});
 
 			while (IS_STOP_Receiver) {
-				Thread.sleep(Sleep_Interval);
+				Thread.sleep(interval);
 			}
 
 		} catch (JMSException e) {
@@ -139,5 +141,12 @@ public abstract class MQReceiver<T extends Serializable> {
 	 * @return
 	 */
 	protected abstract boolean handle(T message);
+	
+	/**
+	 * 停止接收topic
+	 */
+	public void stopReceiverTopic(){
+		this.IS_STOP_Receiver = false;
+	}
 
 }

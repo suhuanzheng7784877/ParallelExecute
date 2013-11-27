@@ -7,12 +7,14 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.para.util.PropertiesUtil;
 
 /**
  * MQ消息发送者
@@ -28,9 +30,11 @@ public class MQSender {
 
 	private static final Log LOG = LogFactory.getLog(MQSender.class);
 
+	final static String MQ_BrokerURL = PropertiesUtil.getValue("mq.brokerURL");
+
 	// TODO:写入配置
 	protected final static ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
-			"tcp://localhost:61616");
+			MQ_BrokerURL);
 
 	protected Connection senderConnection = null;
 	protected Session session = null;
@@ -71,7 +75,45 @@ public class MQSender {
 			MessageProducer producer = session.createProducer(topic);
 			ObjectMessage objectMessage = session.createObjectMessage();
 			objectMessage.setObject(messageObject);
-			LOG.info("send message:" + objectMessage);
+			LOG.info("send Topic message:" + objectMessage);
+			producer.send(objectMessage);
+			return true;
+		} catch (JMSException e) {
+			e.printStackTrace();
+			LOG.error("error", e);
+			return false;
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+					senderConnection.close();
+				} catch (JMSException e) {
+					LOG.error("error", e);
+					return false;
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * 发送queue消息
+	 * 
+	 * @param 消息目的
+	 *            :topicName
+	 * @param 消息体
+	 *            :messageObject
+	 * @return
+	 * @throws JMSException
+	 */
+	public boolean sendQueueMessage(String queueName, Serializable messageObject) {
+		Queue queue = null;
+		try {
+			queue = session.createQueue(queueName);
+			MessageProducer producer = session.createProducer(queue);
+			ObjectMessage objectMessage = session.createObjectMessage();
+			objectMessage.setObject(messageObject);
+			LOG.info("send Queue message:" + objectMessage);
 			producer.send(objectMessage);
 			return true;
 		} catch (JMSException e) {

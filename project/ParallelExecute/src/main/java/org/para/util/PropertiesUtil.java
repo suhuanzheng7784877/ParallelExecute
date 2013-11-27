@@ -9,8 +9,11 @@ import org.apache.log4j.Logger;
 
 /**
  * 读取Properties文件的内容
- * 
  * @author liuyan
+ * @Email:suhuanzheng7784877@163.com
+ * @version 0.1
+ * @Date: 2013-11-27
+ * @Copyright: 2013 story All rights reserved.
  */
 public class PropertiesUtil {
 

@@ -20,6 +20,16 @@ public class MQConstant {
 	/**
 	 * 子节点执行任务后的反馈-目标
 	 */
-	public final static String RESPONSE_TASKS_Queue = "RESPONSE_TASKS_Queue";
+	public final static String RESPONSE_TASKS_Queue_Destination = "RESPONSE_TASKS_Queue";
+
+	/**
+	 * 注册worker节点
+	 */
+	public final static String REGISTER_WORKER_Queue_Destination = "Register_Worker_Queue";
+	
+	/**
+	 * 心跳worker节点
+	 */
+	public final static String HEARTBEAT_WORKER_Queue_Destination = "Heartbeat_Worker_Queue";
 
 }
