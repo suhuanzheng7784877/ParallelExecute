@@ -161,6 +161,20 @@ public abstract class MQReceiver<T extends Serializable> {
 			comsumer.receive();
 		} catch (JMSException e1) {
 			e1.printStackTrace();
+			try {
+				if (session != null) {
+					session.close();
+					session = null;
+				}
+				if (receiverConnection != null) {
+					receiverConnection.stop();
+					receiverConnection.close();
+					receiverConnection = null;
+				}
+			} catch (JMSException e) {
+				LOG.error("error", e);
+			}
+
 		}
 
 	}
@@ -172,7 +186,6 @@ public abstract class MQReceiver<T extends Serializable> {
 	 * @return
 	 */
 	protected abstract boolean handle(T message);
-
 	public void closeResource() {
 		try {
 			if (session != null) {
@@ -188,7 +201,6 @@ public abstract class MQReceiver<T extends Serializable> {
 			LOG.error("error", e);
 		}
 	}
-
 	/**
 	 * 停止接收topic
 	 */

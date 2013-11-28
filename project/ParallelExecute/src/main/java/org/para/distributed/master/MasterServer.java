@@ -75,6 +75,7 @@ public class MasterServer {
 		registerAndHeartbeatWorkerMQReceiver2
 				.receiverQueueMessage(MQConstant.HEARTBEAT_WORKER_Queue_Destination);
 
+
 	}
 
 }
