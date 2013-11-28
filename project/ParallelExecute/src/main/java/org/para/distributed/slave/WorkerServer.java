@@ -41,6 +41,7 @@ public class WorkerServer {
 		RegisterAndHeartbeatWorkerSender.registerWorker();
 		startReceiverListener();
 		LOG.info("工作结点开始守护..");
+		startListener();
 		while (Is_Runing) {
 			// 发送心跳
 			try {
@@ -60,9 +61,11 @@ public class WorkerServer {
 	 * 启动MQ的消费者监听器
 	 */
 	private static void startReceiverListener() {
-		
+
 		LOG.info("启动监听消息-分发任务");
-		
+	}
+
+	private static void startListener() {
 		// 1-启动分布式任务的接收器
 		StartDistributeTaskMQReceiver startDistributeTaskMQReceiver = new StartDistributeTaskMQReceiver();
 		startDistributeTaskMQReceiver
