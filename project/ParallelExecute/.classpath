@@ -18,5 +18,12 @@
 	<classpathentry kind="lib" path="lib/geronimo-jms_1.1_spec-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/spring-aop-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-aspects-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-beans-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-support-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-core-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-jms-3.2.5.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

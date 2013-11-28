@@ -2,6 +2,8 @@ package org.para.distributed.master;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.para.constant.MQConstant;
+import org.para.distributed.mq.RegisterAndHeartbeatWorkerMQReceiver;
 import org.para.util.PropertiesUtil;
 
 /**
@@ -32,18 +34,18 @@ public class MasterServer {
 	public static void startMaster() {
 		Is_Runing = true;
 
-		startListener();
-
+		startReceiverListener();
+		LOG.info("管理结点开始守护..");
 		while (Is_Runing) {
 			// 发送心跳
 			try {
 				Thread.sleep(interval);
-				startListener();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				LOG.error("error", e);
 			}
 		}
+		LOG.info("管理结点结束守护..");
 		System.exit(0);
 
 	}
@@ -58,7 +60,20 @@ public class MasterServer {
 	/**
 	 * 启动MQ的消费者监听器
 	 */
-	private static void startListener() {
+	private static void startReceiverListener() {
+		
+		LOG.info("启动监听消息-注册");
+		
+		// 1-启动分布式任务的接收器
+		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver1 = new RegisterAndHeartbeatWorkerMQReceiver();
+		registerAndHeartbeatWorkerMQReceiver1
+				.receiverQueueMessage(MQConstant.REGISTER_WORKER_Queue_Destination);
+		
+		LOG.info("启动监听消息-心跳");
+		// 2-启动分布式任务的接收器
+		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver2 = new RegisterAndHeartbeatWorkerMQReceiver();
+		registerAndHeartbeatWorkerMQReceiver2
+				.receiverQueueMessage(MQConstant.HEARTBEAT_WORKER_Queue_Destination);
 
 	}
 

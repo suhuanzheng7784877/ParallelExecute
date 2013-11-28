@@ -4,11 +4,13 @@ import java.io.Serializable;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
@@ -80,34 +82,7 @@ public abstract class MQReceiver<T extends Serializable> {
 		Topic topic = null;
 		try {
 			topic = session.createTopic(topicName);
-			// 注册消息消费者
-			MessageConsumer comsumer = session.createConsumer(topic);
-			comsumer.setMessageListener(new MessageListener() {
-				@SuppressWarnings("unchecked")
-				public void onMessage(Message message) {
-					try {
-
-						// 对象类型的信息
-						ObjectMessage objectMessage = ((ObjectMessage) message);
-
-						// 将对象信息序列化
-						T objectMessageSerializable = (T) objectMessage
-								.getObject();
-
-						LOG.info("start handle");
-
-						// 处理逻辑
-						handle(objectMessageSerializable);
-
-					} catch (JMSException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			while (IS_STOP_Receiver) {
-				Thread.sleep(interval);
-			}
+			receiverJMSMessage(topic);
 
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -116,20 +91,76 @@ public abstract class MQReceiver<T extends Serializable> {
 			e.printStackTrace();
 			LOG.error("error", e);
 		} finally {
-			try {
-				if (session != null) {
-					session.close();
-					session = null;
-				}
-				if (receiverConnection != null) {
-					receiverConnection.stop();
-					receiverConnection.close();
-					receiverConnection = null;
-				}
-			} catch (JMSException e) {
-				LOG.error("error", e);
-			}
+			closeResource();
+		}
 
+	}
+
+	/**
+	 * 发送topic消息
+	 * 
+	 * @param 消息目的
+	 *            :topicName
+	 * @param 消息体
+	 *            :messageObject
+	 * @return
+	 * @throws JMSException
+	 */
+	public void receiverQueueMessage(String queueName) {
+		Queue queue = null;
+		try {
+			queue = session.createQueue(queueName);
+			receiverJMSMessage(queue);
+
+		} catch (JMSException e) {
+			e.printStackTrace();
+			LOG.error("error", e);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			LOG.error("error", e);
+		} finally {
+			closeResource();
+
+		}
+
+	}
+
+	/**
+	 * 发消息
+	 * 
+	 * @param destination
+	 * @throws JMSException
+	 * @throws InterruptedException
+	 */
+	private void receiverJMSMessage(Destination destination)
+			throws JMSException, InterruptedException {
+
+		// 注册消息消费者
+		MessageConsumer comsumer = null;
+		try {
+			comsumer = session.createConsumer(destination);
+			comsumer.setMessageListener(new MessageListener() {
+				@SuppressWarnings("unchecked")
+				public void onMessage(Message message) {
+					try {
+						// 对象类型的信息
+						ObjectMessage objectMessage = ((ObjectMessage) message);
+
+						// 将对象信息序列化
+						T objectMessageSerializable = (T) objectMessage
+								.getObject();
+
+						// 处理逻辑-放到另一个线程执行
+						handle(objectMessageSerializable);
+
+					} catch (JMSException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			comsumer.receive();
+		} catch (JMSException e1) {
+			e1.printStackTrace();
 		}
 
 	}
@@ -141,11 +172,27 @@ public abstract class MQReceiver<T extends Serializable> {
 	 * @return
 	 */
 	protected abstract boolean handle(T message);
-	
+
+	public void closeResource() {
+		try {
+			if (session != null) {
+				session.close();
+				session = null;
+			}
+			if (receiverConnection != null) {
+				receiverConnection.stop();
+				receiverConnection.close();
+				receiverConnection = null;
+			}
+		} catch (JMSException e) {
+			LOG.error("error", e);
+		}
+	}
+
 	/**
 	 * 停止接收topic
 	 */
-	public void stopReceiverTopic(){
+	public void stopReceiverTopic() {
 		this.IS_STOP_Receiver = false;
 	}
 

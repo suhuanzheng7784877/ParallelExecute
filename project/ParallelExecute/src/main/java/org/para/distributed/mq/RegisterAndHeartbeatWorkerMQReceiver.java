@@ -2,6 +2,7 @@ package org.para.distributed.mq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.util.MQReceiver;
 
 /**
@@ -14,18 +15,18 @@ import org.para.distributed.util.MQReceiver;
  * @Copyright: 2013 story All rights reserved.
  * 
  */
-public class StartDistributeTaskMQReceiver extends
-		MQReceiver<DistributedTaskMessage> {
+public class RegisterAndHeartbeatWorkerMQReceiver extends
+		MQReceiver<WorkerNode> {
 
 	private static final Log LOG = LogFactory
-			.getLog(StartDistributeTaskMQReceiver.class);
+			.getLog(RegisterAndHeartbeatWorkerMQReceiver.class);
 
-	public StartDistributeTaskMQReceiver() {
+	public RegisterAndHeartbeatWorkerMQReceiver() {
 		super();
 	}
 
 	@Override
-	protected boolean handle(DistributedTaskMessage message) {
+	protected boolean handle(WorkerNode message) {
 		LOG.info("message:" + message);
 		return false;
 	}
