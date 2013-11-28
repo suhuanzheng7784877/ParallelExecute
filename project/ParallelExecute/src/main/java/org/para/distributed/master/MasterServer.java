@@ -2,6 +2,8 @@ package org.para.distributed.master;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.para.constant.MQConstant;
+import org.para.distributed.mq.RegisterAndHeartbeatWorkerMQReceiver;
 import org.para.util.PropertiesUtil;
 
 /**
@@ -59,6 +61,16 @@ public class MasterServer {
 	 * 启动MQ的消费者监听器
 	 */
 	private static void startListener() {
+
+		// 1-启动分布式任务的接收器
+		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver1 = new RegisterAndHeartbeatWorkerMQReceiver();
+		registerAndHeartbeatWorkerMQReceiver1
+				.receiverQueueMessage(MQConstant.REGISTER_WORKER_Queue_Destination);
+
+		// 2-启动分布式任务的接收器
+		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver2 = new RegisterAndHeartbeatWorkerMQReceiver();
+		registerAndHeartbeatWorkerMQReceiver2
+				.receiverQueueMessage(MQConstant.HEARTBEAT_WORKER_Queue_Destination);
 
 	}
 

@@ -2,7 +2,9 @@ package org.para.distributed.slave;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.para.distributed.mq.RegisterWorkerSender;
+import org.para.constant.MQConstant;
+import org.para.distributed.mq.RegisterAndHeartbeatWorkerSender;
+import org.para.distributed.mq.StartDistributeTaskMQReceiver;
 import org.para.util.PropertiesUtil;
 
 /**
@@ -27,19 +29,22 @@ public class WorkerServer {
 			.getValue("server.sleep.interval"));
 
 	public static void main(String[] args) {
-		startWork();
+		startWorker();
 	}
 
-	public static void startWork() {
+	/**
+	 * 启动worker节点
+	 */
+	public static void startWorker() {
 		Is_Runing = true;
 		// 发送注册节点的消息
-		RegisterWorkerSender.registerWorker();
+		RegisterAndHeartbeatWorkerSender.registerWorker();
 		startListener();
 		while (Is_Runing) {
 			// 发送心跳
 			try {
 				Thread.sleep(interval);
-				RegisterWorkerSender.heartbeatWorker();
+				RegisterAndHeartbeatWorkerSender.heartbeatWorker();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				LOG.error("error", e);
@@ -54,9 +59,13 @@ public class WorkerServer {
 	 */
 	private static void startListener() {
 
+		// 1-启动分布式任务的接收器
+		StartDistributeTaskMQReceiver startDistributeTaskMQReceiver = new StartDistributeTaskMQReceiver();
+		startDistributeTaskMQReceiver
+				.receiverTopicMessage(MQConstant.START_DISTRIBUTED_TASK_TOPIC_Destination);
 	}
 
-	public static void stopWork() {
+	public static void stopWorker() {
 		Is_Runing = false;
 	}
 

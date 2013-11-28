@@ -26,7 +26,6 @@ public class StartDistributeTaskMQReceiver extends
 
 	@Override
 	protected boolean handle(DistributedTaskMessage message) {
-		LOG.info("start handle");
 		LOG.info("message:" + message);
 		return false;
 	}
