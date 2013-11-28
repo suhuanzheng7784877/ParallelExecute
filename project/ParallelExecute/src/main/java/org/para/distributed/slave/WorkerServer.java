@@ -2,9 +2,6 @@ package org.para.distributed.slave;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.para.constant.MQConstant;
-import org.para.distributed.mq.RegisterAndHeartbeatWorkerSender;
-import org.para.distributed.mq.StartDistributeTaskMQReceiver;
 import org.para.util.PropertiesUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
