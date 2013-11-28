@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:jms="http://www.springframework.org/schema/jms" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.2.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd"
+	default-autowire="byName" default-lazy-init="false">
+
+	<!-- 读取配置文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:distributed.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- memcache相关配置 -->
+	<!-- server -->
+	<bean id="memcachedClientBuilder" class="net.rubyeye.xmemcached.XMemcachedClientBuilder"
+		p:connectionPoolSize="${memcached.connectionPoolSize}" p:failureMode="${memcached.failureMode}">
+		<!-- XMemcachedClientBuilder have two arguments.First is server list,and 
+			second is weights array. -->
+		<constructor-arg>
+			<list>
+				<bean class="java.net.InetSocketAddress">
+					<constructor-arg>
+						<value>${memcache1.server}</value>
+					</constructor-arg>
+					<constructor-arg>
+						<value>${memcache1.port}</value>
+					</constructor-arg>
+				</bean>
+			</list>
+		</constructor-arg>
+		<!-- <constructor-arg> <list> <value>${memcached.server1.weight}</value> 
+			<value>${memcached.server2.weight}</value> <value>${memcached.server3.weight}</value> 
+			<value>${memcached.server4.weight}</value> </list> </constructor-arg> -->
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.TextCommandFactory" />
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator" />
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+	</bean>
+	<!-- Use factory bean to build memcached client -->
+	<bean id="memcachedClient" factory-bean="memcachedClientBuilder"
+		factory-method="build" destroy-method="shutdown" />
+	<!-- memcache finish -->
+
+	<!-- 配置connectionFactory -->
+	<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		destroy-method="stop">
+		<property name="connectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL">
+					<value>${mq.brokerURL}</value>
+				</property>
+			</bean>
+		</property>
+		<property name="maxConnections" value="100"></property>
+	</bean>
+
+	<!-- Spring JMS Template -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory">
+			<ref local="jmsFactory" />
+		</property>
+		<property name="explicitQosEnabled" value="true" />
+		<!-- 区别它采用的模式为false是p2p为true是订阅 -->
+		<property name="pubSubDomain" value="true" />
+		<property name="defaultDestinationName" value="subject" />
+	</bean>
+
+	<bean id="queueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory">
+			<ref local="jmsFactory" />
+		</property>
+		<property name="timeToLive" value="100000" />
+		<property name="explicitQosEnabled" value="false" />
+		<!-- 区别它采用的模式为false是p2p为true是订阅 -->
+		<property name="pubSubDomain" value="false" />
+		<property name="defaultDestinationName" value="subjectQueue" />
+	</bean>
+
+
+	<!-- 发送消息的目的地（一个队列） -->
+	<bean id="startJobJmsSendDestination" class="org.apache.activemq.command.ActiveMQTopic">
+		<!-- 设置消息队列的名字 -->
+		<constructor-arg index="0" value="startJobJmsSendDestination" />
+	</bean>
+
+	<!-- 资源调度下发nodeagent指令jms -->
+	<bean id="startJobJmsSend" class="org.para.distributed.mq.StartJobJmsSend">
+		<property name="template" ref="jmsTemplate"></property>
+		<property name="destinationSend" ref="startJobJmsSendDestination"></property>
+	</bean>
+
+	<bean id="distributedParallelExecute" abstract="true"
+		class="org.para.distributed.master.DistributedParallelExecute">
+		<property name="startJobJmsSend" ref="startJobJmsSend"></property>
+	</bean>
+
+	<!-- 执行资源调度的命令的接收逻辑类 -->
+	<bean id="registerWorkListener" class="org.para.distributed.mq.RegisterJmsListener">
+	</bean>
+	<bean id="heartbeatJmsListener" class="org.para.distributed.mq.HeartbeatJmsListener">
+	</bean>
+	<bean id="responseExecuteResultJmsListener"
+		class="org.para.distributed.mq.ResponseExecuteResultJmsListener">
+	</bean>
+
+
+
+	<!-- 接收广播命令 -->
+	<jms:listener-container connection-factory="jmsFactory"
+		destination-type="topic">
+
+		<!-- 监听资源调度下发的命令 -->
+		<jms:listener destination="registerWorkDestination" ref="registerWorkListener" />
+		<jms:listener destination="heartbeatWorkDestination" ref="heartbeatJmsListener" />
+		<jms:listener destination="responseExecuteResultSendDestination"
+			ref="responseExecuteResultJmsListener" />
+	</jms:listener-container>
+
+	<!-- 接收广播命令 -->
+	<jms:listener-container connection-factory="jmsFactory"
+		destination-type="queue">
+
+
+	</jms:listener-container>
+
+</beans>

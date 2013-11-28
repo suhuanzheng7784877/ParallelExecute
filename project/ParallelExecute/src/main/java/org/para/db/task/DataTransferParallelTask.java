@@ -27,6 +27,10 @@ import org.para.util.SQLStringUtil;
  */
 public class DataTransferParallelTask extends ParallelTask<DbSourceJobType> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private DbTargetJobType dbTargetJobType;
 
 	public DbTargetJobType getDbTargetJobType() {
@@ -36,13 +40,28 @@ public class DataTransferParallelTask extends ParallelTask<DbSourceJobType> {
 	public void setDbTargetJobType(DbTargetJobType dbTargetJobType) {
 		this.dbTargetJobType = dbTargetJobType;
 	}
-
+	
+	/**
+	 * 
+	 * @param countDownLatch
+	 * @param taskProperty
+	 * @param targetObject
+	 * @param failEventListener
+	 */
 	public DataTransferParallelTask(CountDownLatch countDownLatch,
 			TaskProperty taskProperty, DbSourceJobType targetObject,
 			FailEventListener failEventListener) {
 		super(taskProperty, targetObject, countDownLatch, failEventListener);
 	}
-
+	
+	/**
+	 * 
+	 * @param countDownLatch
+	 * @param taskProperty
+	 * @param targetObject
+	 * @param failEventListener
+	 * @param dbTargetJobType
+	 */
 	public DataTransferParallelTask(CountDownLatch countDownLatch,
 			TaskProperty taskProperty, DbSourceJobType targetObject,
 			FailEventListener failEventListener, DbTargetJobType dbTargetJobType) {
@@ -66,11 +85,11 @@ public class DataTransferParallelTask extends ParallelTask<DbSourceJobType> {
 		try {
 			sourceConnection = DBDataUtil.getConnection(sourceJobObject);
 
-			// 2-get partition data 
+			// 2-get partition data
 			preparedStatement = sourceConnection.prepareStatement(exeSelectSql);
 			sourceResultSetMetaData = DBResultCache.getResultSetMetaData(
 					sourceJobObject, preparedStatement);
-			
+
 			sourceResultSet = preparedStatement.executeQuery();
 
 			// 3-insert into target database

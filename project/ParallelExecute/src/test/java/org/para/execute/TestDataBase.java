@@ -16,7 +16,7 @@ import org.para.jobType.db.DbSourceJobType;
 import org.para.jobType.db.DbTargetJobType;
 import org.para.util.DBDataUtil;
 import org.para.util.MessageOutUtil;
-
+@SuppressWarnings("unused")
 public class TestDataBase {
 
 	@Test
@@ -79,6 +79,7 @@ public class TestDataBase {
 		try {
 
 			DbUtils.loadDriver("com.mysql.jdbc.Driver");
+			
 			String sql = "select name,age from person LIMIT 1,1000";
 			String sql1 = "select count(id) from person";
 			Connection connection = DriverManager

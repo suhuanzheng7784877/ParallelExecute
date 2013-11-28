@@ -1,6 +1,7 @@
 package org.para.util.jar;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * 
@@ -12,6 +13,37 @@ import java.io.IOException;
  * 
  */
 public class ExtendsClassLoaderFacade {
+	
+	/**
+	 * scan Jar File
+	 * 
+	 * @param jarFilePath
+	 * @param isRefresh
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean addSelfJarFile(String jarFilePath)
+			throws IOException {
+		try {
+			return ExtendsJarScanner.addSelfJarFile(jarFilePath);
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	/**
 	 * scan Jar File
@@ -24,6 +56,19 @@ public class ExtendsClassLoaderFacade {
 	public static boolean scanJarFile(String jarFilePath, boolean isRefresh)
 			throws IOException {
 		return ExtendsJarScanner.scanFileClass(jarFilePath, isRefresh);
+	}
+	
+	/**
+	 * scan Jar File
+	 * 
+	 * @param jarFilePath
+	 * @param isRefresh
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean scanJarFileAtSystemClassLoader(String jarFilePath, boolean isRefresh)
+			throws IOException {
+		return ExtendsJarScanner.scanFileClassAtSystemClassLoader(jarFilePath, isRefresh);
 	}
 
 	/**

@@ -35,8 +35,8 @@ public class DefaultFailHandleStrategy implements HandleStrategy {
 
 	@Override
 	public int handle(ParallelEvent parallelEvent) {
-		MessageOutUtil.SystemOutPrint("FailHandleStrategy:Fail Handle source event "
-				+ parallelEvent.getSource());
+		MessageOutUtil.SystemOutPrint("[FailHandleStrategy:Fail Handle source event "
+				+ parallelEvent.getSource()+"]");
 		return 1;
 	}
 

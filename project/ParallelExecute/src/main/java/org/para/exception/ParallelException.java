@@ -2,6 +2,9 @@ package org.para.exception;
 
 import java.io.IOException;
 
+import org.apache.thrift.TException;
+import org.apache.thrift.transport.TTransportException;
+
 /**
  * ParallelException
  * 
@@ -12,7 +15,7 @@ import java.io.IOException;
  * @Copyright: 2013 story All rights reserved.
  */
 public class ParallelException extends Exception {
-	
+
 	/**
 	 * 
 	 */
@@ -20,12 +23,24 @@ public class ParallelException extends Exception {
 
 	private Exception exception;
 
+	public ParallelException(Exception exception) {
+		this.exception = exception;
+	}
+
 	public ParallelException(InterruptedException interruptedException) {
 		this.exception = interruptedException;
 	}
 
 	public ParallelException(IOException ioException) {
 		this.exception = ioException;
+	}
+
+	public ParallelException(TTransportException tTransportException) {
+		this.exception = tTransportException;
+	}
+
+	public ParallelException(TException tException) {
+		this.exception = tException;
 	}
 
 	@Override

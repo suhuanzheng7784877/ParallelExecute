@@ -23,7 +23,7 @@ public class SortStrategy {
 	 * 
 	 * @param list
 	 */
-	public static void sortCandidateList(List<WorkerNode> list) {
+	public synchronized static void sortCandidateList(List<WorkerNode> list) {
 		// logger.info("结点资源按照CPU、内存参数进行排序");
 		Collections.sort(list, new SortCPUAndMemroyComparator());
 	}

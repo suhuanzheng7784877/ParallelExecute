@@ -3,9 +3,9 @@ package org.para.distributed.mq;
 import java.net.UnknownHostException;
 
 import org.apache.log4j.Logger;
-import org.para.constant.MQConstant;
 import org.para.distributed.dto.WorkerNode;
-import org.para.distributed.util.MQSender;
+import org.para.distributed.slave.RegisterMessageAction;
+import org.para.distributed.slave.WorkerServer;
 import org.para.distributed.util.SystemUtil;
 
 /**
@@ -17,49 +17,32 @@ import org.para.distributed.util.SystemUtil;
  * @Date: 2013-11-27
  * @Copyright: 2013 story All rights reserved.
  */
-public class RegisterWorkerSender {
+public class RegisterWorkerSender implements Runnable {
 
 	private static Logger logger = Logger.getLogger(RegisterWorkerSender.class);
 
-	/**
-	 * 发送注册节点的消息
-	 * 
-	 * @return
-	 */
-	public static boolean registerWorker() {
-		MQSender mqSender = new MQSender();
-		boolean result = false;
-		// 注册节点实例
+	RegisterMessageAction registerMessageAction = WorkerServer.WorkApplicationContext
+			.getBean("RegisterMessageAction", RegisterMessageAction.class);
+
+	@Override
+	public void run() {
+
 		try {
-			WorkerNode workerNode = SystemUtil.getWorkerNode(true);
-			result = mqSender.sendQueueMessage(
-					MQConstant.REGISTER_WORKER_Queue_Destination, workerNode);
-		} catch (UnknownHostException e) {
+
+			// 先睡5秒钟
+			Thread.sleep(5000L);
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 			logger.error("error", e);
 		}
-		return result;
-
-	}
-	
-	/**
-	 * 发送注册节点的消息
-	 * 
-	 * @return
-	 */
-	public static boolean heartbeatWorker() {
-		MQSender mqSender = new MQSender();
-		boolean result = false;
-		// 注册节点实例
 		try {
 			WorkerNode workerNode = SystemUtil.getWorkerNode(false);
-			result = mqSender.sendQueueMessage(
-					MQConstant.REGISTER_WORKER_Queue_Destination, workerNode);
+
+			registerMessageAction.sendJms(workerNode);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			logger.error("error", e);
 		}
-		return result;
 
 	}
 

@@ -25,6 +25,10 @@ public class WorkerManagers {
 	 */
 	private final static Set<WorkerNode> workerNodes = new CopyOnWriteArraySet<WorkerNode>();
 
+	public static Set<WorkerNode> getWorkernodes() {
+		return workerNodes;
+	}
+
 	/**
 	 * 选出最靠前的几个节点
 	 * 
@@ -63,7 +67,10 @@ public class WorkerManagers {
 	 * 
 	 * @param workerNode
 	 */
-	public static void addWorkerNode(WorkerNode workerNode) {
+	public static void addOrReplaceWorkerNode(WorkerNode workerNode) {
+		if (workerNodes.contains(workerNode)) {
+			removeWorkerNode(workerNode);
+		}
 		workerNodes.add(workerNode);
 	}
 
@@ -95,6 +102,27 @@ public class WorkerManagers {
 	 */
 	public static void clearWorkerNode() {
 		workerNodes.clear();
+	}
+
+	/**
+	 * 获取节点资源的个数
+	 * 
+	 * @return
+	 */
+	public static int getWorkerNodeSize() {
+		return workerNodes.size();
+	}
+
+	/**
+	 * 是否有足够的资源去执行分布式任务
+	 * 
+	 * @return
+	 */
+	public static boolean isHaveWorkerNodeToExecuteDistributed() {
+		if (getWorkerNodeSize() > 0) {
+			return true;
+		}
+		return false;
 	}
 
 }

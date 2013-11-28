@@ -20,6 +20,10 @@ import org.para.trace.listener.FailEventListener;
  */
 public class ByteCopyFileParallelTask extends ParallelTask<File> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String targetFileName;
 
 	public String getTargetFileName() {

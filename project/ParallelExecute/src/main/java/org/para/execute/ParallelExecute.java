@@ -14,8 +14,7 @@ import org.para.trace.listener.FailEventListener;
 import org.para.util.MessageOutUtil;
 
 /**
- * 抽象的并行任务
- * abstract ParallelExecute
+ * 抽象的并行任务 abstract ParallelExecute
  * 
  * @author liuyan
  * @Email:suhuanzheng7784877@163.com
@@ -33,14 +32,14 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 * same this.exeParalleJob(sourceObject, blockNum, 0, null, objects)
 	 * 
 	 * @param sourceObject
-	 * @param blockNum
+	 * @param parallelism_hint
 	 * @param objects
 	 * @return
 	 * @throws ParallelException
 	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
+	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, 0, null, objects);
+		return this.exeParalleJob(sourceObject, parallelism_hint, 0, null, objects);
 	}
 
 	/**
@@ -50,14 +49,14 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 * null,objects);
 	 * 
 	 * @param sourceObject
-	 * @param blockNum
+	 * @param parallelism_hint
 	 * @param objects
 	 * @return
 	 * @throws ParallelException
 	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
+	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			long timeOut, Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, timeOut, null,
+		return this.exeParalleJob(sourceObject, parallelism_hint, timeOut, null,
 				objects);
 	}
 
@@ -68,35 +67,36 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 * failEventListener,objects);
 	 * 
 	 * @param sourceObject
-	 * @param blockNum
+	 * @param parallelism_hint
 	 * @param failEventListener
 	 * @param objects
 	 * @return
 	 * @throws ParallelException
 	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
+	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			FailEventListener failEventListener, Object... objects)
 			throws ParallelException {
-		return this.exeParalleJob(sourceObject, blockNum, 0, failEventListener,
+		return this.exeParalleJob(sourceObject, parallelism_hint, 0, failEventListener,
 				objects);
 	}
 
 	/**
 	 * exe big Paralle Job template,this is croe execute logic
+	 * 
 	 * @param sourceObject
-	 * @param blockNum
+	 * @param parallelism_hint
 	 * @param timeOut
 	 * @param failEventListener
 	 * @param objects
 	 * @return
 	 * @throws ParallelException
 	 */
-	public JobProperty exeParalleJob(T sourceObject, int blockNum,
+	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			long timeOut, FailEventListener failEventListener,
 			Object... objects) throws ParallelException {
-		init(sourceObject,objects);
+		init(sourceObject, objects);
 		long jobId = System.nanoTime();
-		TaskProperty[] taskPropertyArray = splitJob(sourceObject, blockNum);
+		TaskProperty[] taskPropertyArray = splitJob(sourceObject, parallelism_hint);
 		countDownLatch = new CountDownLatch(taskPropertyArray.length);
 		execute(taskPropertyArray, sourceObject, failEventListener, objects);
 		try {
@@ -109,6 +109,7 @@ public abstract class ParallelExecute<T extends Serializable> {
 		} catch (InterruptedException interruptedException) {
 			throw new ParallelException(interruptedException);
 		}
+
 		return joinJob(jobId, taskPropertyArray);
 	}
 
@@ -117,7 +118,7 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 * 
 	 * @param objects
 	 */
-	protected abstract void init(T sourceObject,Object... objects);
+	protected abstract void init(T sourceObject, Object... objects);
 
 	/**
 	 * split big Job to TaskProperty Arrys

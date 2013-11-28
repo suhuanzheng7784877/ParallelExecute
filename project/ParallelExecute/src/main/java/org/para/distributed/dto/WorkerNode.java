@@ -1,6 +1,5 @@
 package org.para.distributed.dto;
 
-import java.io.Serializable;
 
 /**
  * 节点机器相关信息
@@ -12,12 +11,42 @@ import java.io.Serializable;
  * @Copyright: 2013 story All rights reserved.
  * 
  */
-public class WorkerNode implements Serializable, Cloneable {
+public class WorkerNode extends MqMessage {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * 节点ip
+	 */
+	private String workerIp;
+
+	/**
+	 * 剩余硬盘
+	 */
+	private long freedisk;
+
+	/**
+	 * 剩余内存
+	 */
+	private long freememroy;
+
+	/**
+	 * 创建时间
+	 */
+	private long createtime;
+
+	/**
+	 * 上次心跳时间
+	 */
+	private long lasthearttime;
+
+	/**
+	 * cpu闲置率
+	 */
+	private float cpufreerate;
 
 	/**
 	 * 节点机器相关信息
@@ -75,35 +104,7 @@ public class WorkerNode implements Serializable, Cloneable {
 		return workerNode;
 	}
 
-	/**
-	 * 节点ip
-	 */
-	private String workerIp;
 
-	/**
-	 * 剩余硬盘
-	 */
-	private long freedisk;
-
-	/**
-	 * 剩余内存
-	 */
-	private long freememroy;
-
-	/**
-	 * 创建时间
-	 */
-	private long createtime;
-
-	/**
-	 * 上次心跳时间
-	 */
-	private long lasthearttime;
-
-	/**
-	 * cpu闲置率
-	 */
-	private float cpufreerate;
 
 	public String getWorkerIp() {
 		return workerIp;

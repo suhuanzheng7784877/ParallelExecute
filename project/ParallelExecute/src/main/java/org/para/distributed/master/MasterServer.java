@@ -2,9 +2,11 @@ package org.para.distributed.master;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.para.constant.MQConstant;
-import org.para.distributed.mq.RegisterAndHeartbeatWorkerMQReceiver;
-import org.para.util.PropertiesUtil;
+import org.para.distributed.thrift.server.DistributedParalleExecuteTHsHaServer;
+import org.para.trace.fail.strategy.DefaultFailHandleStrategy;
+import org.para.trace.listener.DefaultFailEventListener;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * 管理机器服务
@@ -17,65 +19,46 @@ import org.para.util.PropertiesUtil;
  */
 public class MasterServer {
 
+	private static final Log LOG = LogFactory.getLog(MasterServer.class);
+
 	/**
 	 * 是否处于运行时状态
 	 */
 	public volatile static boolean Is_Runing = true;
 
-	private final static long interval = Long.parseLong(PropertiesUtil
-			.getValue("server.sleep.interval"));
+	// 初始化
+	public final static ApplicationContext MasterApplicationContext = new ClassPathXmlApplicationContext(
+			new String[] { "/applicationContext-master.xml" });
 
-	private static final Log LOG = LogFactory.getLog(MasterServer.class);
+	/**
+	 * 默认的任务执行异常跟踪器
+	 */
+	static DefaultFailEventListener defaultFailEventListener = DefaultFailEventListener
+			.getInstance(DefaultFailHandleStrategy.getInstance());
 
 	public static void main(String[] args) {
 		startMaster();
 	}
 
+	/**
+	 * 程序入口
+	 * 
+	 * @param args
+	 */
 	public static void startMaster() {
 		Is_Runing = true;
-
-		startReceiverListener();
 		LOG.info("管理结点开始守护..");
-		while (Is_Runing) {
-			// 发送心跳
-			try {
-				Thread.sleep(interval);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				LOG.error("error", e);
-			}
-		}
+		DistributedParalleExecuteTHsHaServer.getInstence().startTHsHaServer();
 		LOG.info("管理结点结束守护..");
 		System.exit(0);
-
 	}
 
 	/**
 	 * 停止master
 	 */
 	public static void stopMaster() {
-		Is_Runing = false;
-	}
-
-	/**
-	 * 启动MQ的消费者监听器
-	 */
-	private static void startReceiverListener() {
-		
-		LOG.info("启动监听消息-注册");
-		
-		// 1-启动分布式任务的接收器
-		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver1 = new RegisterAndHeartbeatWorkerMQReceiver();
-		registerAndHeartbeatWorkerMQReceiver1
-				.receiverQueueMessage(MQConstant.REGISTER_WORKER_Queue_Destination);
-		
-		LOG.info("启动监听消息-心跳");
-		// 2-启动分布式任务的接收器
-		RegisterAndHeartbeatWorkerMQReceiver registerAndHeartbeatWorkerMQReceiver2 = new RegisterAndHeartbeatWorkerMQReceiver();
-		registerAndHeartbeatWorkerMQReceiver2
-				.receiverQueueMessage(MQConstant.HEARTBEAT_WORKER_Queue_Destination);
-
-
+		LOG.info("stopTHsHaServer");
+		DistributedParalleExecuteTHsHaServer.getInstence().stopTHsHaServer();
 	}
 
 }

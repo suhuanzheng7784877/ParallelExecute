@@ -3,24 +3,28 @@ package org.para.distributed.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.para.distributed.dto.DistributedTaskMessage;
+import org.para.distributed.dto.TaskTargetWorker;
 import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.master.WorkerManagers;
-import org.para.distributed.mq.DistributedTaskMessage;
-import org.para.distributed.mq.TaskTargetWorker;
-import org.para.execute.task.ParallelTask;
+import org.para.distributed.task.DistributedParallelTask;
+import org.para.execute.model.TaskProperty;
 
 /**
  * 构造mq消息实体的辅助类
- *
+ * 
  * @author liuyan
  * @Email:suhuanzheng7784877@163.com
  * @version 0.1
  * @Date: 2013-11-23 下午4:46:46
  * @Copyright: 2013 story All rights reserved.
- *
+ * 
  */
 public class MQMessageBuilder {
-	
+
+	private static Logger logger = Logger.getLogger(MQMessageBuilder.class);
+
 	/**
 	 * 分发任务逻辑
 	 * 
@@ -28,7 +32,7 @@ public class MQMessageBuilder {
 	 * @param taskList
 	 */
 	public static DistributedTaskMessage buildDistributeTasks(long jobId,
-			List<ParallelTask<?>> taskList) {
+			List<DistributedParallelTask> taskList) {
 
 		DistributedTaskMessage distributedTaskMessage = null;
 
@@ -42,23 +46,25 @@ public class MQMessageBuilder {
 		// 候选节点的个数
 		int workerNodeListSize = workerNodeList.size();
 
-		// TODO:拼装mq任务
+		// 拼装mq任务
 		TaskTargetWorker[] taskTargetWorkerArray = new TaskTargetWorker[workerNodeListSize];
 		TaskTargetWorker taskTargetWorker = null;
 		WorkerNode workerNode = null;
-		ParallelTask<?> parallelTask = null;
+		TaskProperty taskProperty = null;
+		
+		//TODO:选择算法需要重构
 		if (workerNodeListSize == parallelNum) {
 			// 备选结点机器个数=任务分发个数
 			for (int i = 0; i < parallelNum; i++) {
-				parallelTask = taskList.get(i);
+				taskProperty = taskList.get(i).getTaskProperty();
 				workerNode = workerNodeList.get(i);
 
-				List<ParallelTask<?>> parallelTaskList = new ArrayList<ParallelTask<?>>(
+				List<TaskProperty> taskPropertyList = new ArrayList<TaskProperty>(
 						1);
-				parallelTaskList.add(parallelTask);
+				taskPropertyList.add(taskProperty);
 
-				taskTargetWorker = new TaskTargetWorker(parallelTaskList,
-						workerNode);
+				taskTargetWorker = new TaskTargetWorker(jobId,
+						taskPropertyList, workerNode);
 				taskTargetWorkerArray[i] = taskTargetWorker;
 			}
 
@@ -68,20 +74,23 @@ public class MQMessageBuilder {
 			int taskTargetWorkerArrayIndex = 0;
 			for (int i = 0; i < parallelNum; i++, taskTargetWorkerArrayIndex++) {
 
-				parallelTask = taskList.get(i);
+				taskProperty = taskList.get(i).getTaskProperty();
+
 				if (i >= workerNodeListSize) {
-					taskTargetWorkerArrayIndex = i - workerNodeListSize;
+					taskTargetWorkerArrayIndex = (i - workerNodeListSize) > taskTargetWorkerArray.length - 1 ? taskTargetWorkerArray.length - 1
+							: i - workerNodeListSize;
+
 					taskTargetWorker = taskTargetWorkerArray[taskTargetWorkerArrayIndex];
-					taskTargetWorker.getParallelTaskList().add(parallelTask);
+					taskTargetWorker.getTaskPropertyList().add(taskProperty);
 				} else {
 					workerNode = workerNodeList.get(taskTargetWorkerArrayIndex);
 
-					List<ParallelTask<?>> parallelTaskList = new ArrayList<ParallelTask<?>>(
+					List<TaskProperty> taskPropertyList = new ArrayList<TaskProperty>(
 							3);
 
-					parallelTaskList.add(parallelTask);
-					taskTargetWorker = new TaskTargetWorker(parallelTaskList,
-							workerNode);
+					taskPropertyList.add(taskProperty);
+					taskTargetWorker = new TaskTargetWorker(jobId,
+							taskPropertyList, workerNode);
 					taskTargetWorkerArray[taskTargetWorkerArrayIndex] = taskTargetWorker;
 				}
 
@@ -92,6 +101,8 @@ public class MQMessageBuilder {
 		}
 		distributedTaskMessage = new DistributedTaskMessage(jobId,
 				taskTargetWorkerArray);
+
+		logger.info("buildDistributeTasks:" + distributedTaskMessage);
 
 		return distributedTaskMessage;
 	}

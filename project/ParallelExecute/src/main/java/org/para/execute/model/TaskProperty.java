@@ -12,7 +12,7 @@ import org.para.enums.TaskCycle;
  * @Date: 2013-8-23
  * @Copyright: 2013 story All rights reserved.
  */
-public class TaskProperty implements Cloneable, Serializable {
+public final class TaskProperty implements Cloneable, Serializable {
 
 	/**
 	 * 
@@ -93,6 +93,41 @@ public class TaskProperty implements Cloneable, Serializable {
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + blockSize;
+		result = prime * result + countBlock;
+		result = prime * result + currentBlockIndex;
+		result = prime * result
+				+ ((taskCycle == null) ? 0 : taskCycle.hashCode());
+		result = prime * result + taskId;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TaskProperty other = (TaskProperty) obj;
+		if (blockSize != other.blockSize)
+			return false;
+		if (countBlock != other.countBlock)
+			return false;
+		if (currentBlockIndex != other.currentBlockIndex)
+			return false;
+		if (taskCycle != other.taskCycle)
+			return false;
+		if (taskId != other.taskId)
+			return false;
+		return true;
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import org.para.file.execute.ByteFileParallelExecute;
 import org.para.file.execute.BytesFileParallelExecute;
 import org.para.trace.listener.DefaultFailEventListener;
 import org.para.util.MessageOutUtil;
-
+@SuppressWarnings("unused")
 public class TestFileParallelExecute {
 
 	@Test

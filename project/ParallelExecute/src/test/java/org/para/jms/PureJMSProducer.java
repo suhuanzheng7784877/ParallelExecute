@@ -5,20 +5,15 @@ import java.net.URISyntaxException;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

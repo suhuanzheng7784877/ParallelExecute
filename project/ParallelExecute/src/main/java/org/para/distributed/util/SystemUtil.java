@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -16,11 +17,9 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.para.distributed.dto.WorkerNode;
-import org.para.execute.task.ParallelTask;
+import org.para.distributed.task.DistributedParallelTask;
 import org.para.util.PropertiesUtil;
 import org.para.util.StringUtil;
-
-import sun.management.ManagementFactory;
 
 import com.sun.management.OperatingSystemMXBean;
 
@@ -28,17 +27,25 @@ import com.sun.management.OperatingSystemMXBean;
  * 获取系统信息相关的辅助方法
  * 
  * @author liuyan
+ * @Email:suhuanzheng7784877@163.com
+ * @version 0.1
+ * @Date: 2013-12-18
+ * @Copyright: 2013 story All rights reserved.
  */
 public final class SystemUtil {
 
 	private static Logger logger = Logger.getLogger(SystemUtil.class);
 
 	/**
+	 * 系统的classpath
+	 */
+	private static String java_class_path = System.getProperty(
+			"java.class.path");
+
+	/**
 	 * 本机node的ip地址
 	 */
 	public volatile static String localIP = null;
-
-	public static final int kb = 1024 * 1024;
 
 	/**
 	 * 查询CPU使用率的命令
@@ -58,13 +65,32 @@ public final class SystemUtil {
 	/**
 	 * 上一次的CPU空闲率
 	 */
-	public static float lastCPURate = 0.0F;
+	public volatile static float lastCPURate = 0.0F;
+
+	/**
+	 * 以mb为单位的分母
+	 */
+	public static final int mb = 1024 * 1024;
+
+	/**
+	 * 操作系统相关的MBean
+	 */
+	public static final OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+			.getOperatingSystemMXBean();
 
 	/**
 	 * 结点机器上可用磁盘根路径
 	 */
 	final static String NODE_ROOT_PATH = PropertiesUtil
 			.getValue("nodeagent.downloadfile.freeDisk");
+
+	static {
+		try {
+			localIP = getIP();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 获取结点硬件信息
@@ -77,9 +103,30 @@ public final class SystemUtil {
 			throws UnknownHostException {
 
 		WorkerNode workerNode = WorkerNode.getSingle();
-		
-		// 本机器IP
-		String localIp = getIP();
+
+		// CPU空闲率
+		float cpuFreeRate;
+
+		// 注册时间
+		long registerTime = System.currentTimeMillis();
+
+		if (isRegister) {
+
+			// [1]-是注册的逻辑
+			workerNode.setCreatetime(registerTime);
+
+			// cpu的闲置率
+			cpuFreeRate = getCpuFreeRateForRegister();
+
+			// 构建节点上的应用实例信息
+			// buildNodeWebAppInstences(workerNode);
+		} else {
+
+			// [2]-心跳的逻辑
+
+			// cpu的闲置率
+			cpuFreeRate = getCpuFreeRateForLinuxHeartbeat();
+		}
 
 		// 本机器空余硬盘
 		long freeDisk = getFreeDisk();
@@ -93,17 +140,11 @@ public final class SystemUtil {
 		// 本机器CPU核数
 		int cpuProcessors = getCPUProcessors();
 
-		// CPU空闲率
-		float cpuFreeRate = getCpuFreeRateForLinuxRegister();
-
-		// 注册时间
-		long registerTime = System.currentTimeMillis();
-
 		// 内存空闲率
 		float memroyFreeRate = Float.parseFloat(String.valueOf(freeMemroy))
 				/ Float.parseFloat(String.valueOf(physicalTotal));
 
-		logger.info("node-ip:" + localIp);
+		logger.info("node-ip:" + localIP);
 		logger.info("freeDisk:" + freeDisk);
 		logger.info("freeMemroy:" + freeMemroy);
 		logger.info("cpuProcessors:" + cpuProcessors);
@@ -112,20 +153,11 @@ public final class SystemUtil {
 		logger.info("memroyFreeRate:" + memroyFreeRate);
 		logger.info("registerTime:" + registerTime);
 
-		workerNode.setWorkerIp(localIp);
+		workerNode.setCpufreerate(cpuFreeRate);
+		workerNode.setWorkerIp(localIP);
 		workerNode.setFreedisk(freeDisk);
 		workerNode.setFreememroy(freeMemroy);
-		workerNode.setCpufreerate(cpuFreeRate);
 		workerNode.setLasthearttime(registerTime);
-
-		if (isRegister) {
-
-			// 是注册的逻辑
-			workerNode.setCreatetime(registerTime);
-
-			// 构建节点上的应用实例信息
-			// buildNodeWebAppInstences(workerNode);
-		}
 
 		return workerNode;
 	}
@@ -155,7 +187,7 @@ public final class SystemUtil {
 	 * 
 	 * @return
 	 */
-	public static List<ParallelTask<?>> getParallelTasks() {
+	public static List<DistributedParallelTask> getParallelTasks() {
 		return null;
 	}
 
@@ -222,9 +254,7 @@ public final class SystemUtil {
 
 		long freeSpaceB = fileRoot.getFreeSpace();
 
-		long freeSpaceKB = freeSpaceB / 1024;
-
-		long freeSpaceMB = freeSpaceKB / 1024;
+		long freeSpaceMB = freeSpaceB / mb;
 
 		return freeSpaceMB;
 
@@ -237,14 +267,11 @@ public final class SystemUtil {
 	 */
 	public static long getFreeMemroy() {
 
-		OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
-				.getOperatingSystemMXBean();
-
 		// 空闲物理内存
-		long physicalFree = osmxb.getFreePhysicalMemorySize() / kb;
+		long physicalFree = osmxb.getFreePhysicalMemorySize() / mb;
 
 		// 系统总物理内存
-		long physicalTotal = osmxb.getTotalPhysicalMemorySize() / kb;
+		long physicalTotal = osmxb.getTotalPhysicalMemorySize() / mb;
 
 		// 已用的物理内存
 		long physicalUse = physicalTotal - physicalFree;
@@ -268,12 +295,11 @@ public final class SystemUtil {
 	 * @return
 	 */
 	public static long getPhysicalTotal() {
-		int kb = 1024 * 1024;
 		OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
 				.getOperatingSystemMXBean();
 
 		// 系统总物理内存
-		long physicalTotal = osmxb.getTotalPhysicalMemorySize() / kb;
+		long physicalTotal = osmxb.getTotalPhysicalMemorySize() / mb;
 
 		// 单位是mb
 		return physicalTotal;
@@ -317,11 +343,11 @@ public final class SystemUtil {
 	}
 
 	/**
-	 * 获取瞬时CPU空闲率, TODO:暂时只支持linux
+	 * 获取瞬时CPU空闲率, TODO:暂时只支持linux windows默认是50%
 	 * 
 	 * @return
 	 */
-	public final static float getCpuFreeRateForLinuxRegister() {
+	public final static float getCpuFreeRateForRegister() {
 
 		// linux系统
 		if (StringUtil.OSisLinux()) {
@@ -597,5 +623,14 @@ public final class SystemUtil {
 		Float cpuFreeFloat = new Float(cpuFree);
 
 		return cpuFreeFloat;
+	}
+
+	/**
+	 * 获取系统的 classpath
+	 * 
+	 * @return
+	 */
+	public static String getSystemClassPath() {
+		return java_class_path;
 	}
 }

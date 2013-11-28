@@ -1,8 +1,6 @@
 package org.para.jms;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -14,13 +12,11 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerFactory;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ActiveMQClient {
+	@SuppressWarnings("unused")
 	private static final Log LOG = LogFactory.getLog(ActiveMQClient.class);
 
 	public static void main(String[] args) throws IOException {

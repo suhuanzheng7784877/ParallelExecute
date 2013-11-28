@@ -105,7 +105,7 @@
 	<target name="jar" depends="compile,bin">
 
 		<!-- jar打包 -->
-		<jar basedir="${classes.dir}" destfile="${deploy.dir}/bin/${jar.file}.jar" />
+		<jar basedir="${classes.dir}" destfile="${deploy.dir}/lib/${jar.file}.jar" />
 
 		<!-- 拷贝lib文件到jar发布路径 -->
 		<copydir src="lib" dest="./${deploy.dir}/lib" />
@@ -148,6 +148,7 @@
 
 	<target name="shell">
 		<copy file="${shell.file}" todir="${deploy.dir}" />
+		
 	</target>
 
 	<!-- 拷贝资源文件 -->
@@ -161,6 +162,8 @@
 			<fileset dir="${resource.dir}" includes="**/*" />
 		</copy>
 		-->
+		<copy file="start-master.bat" todir="${deploy.dir}" />
+		<copy file="start-slave.bat" todir="${deploy.dir}" />
 	</target>
 
 	<!-- 生成javadoc文件 -->

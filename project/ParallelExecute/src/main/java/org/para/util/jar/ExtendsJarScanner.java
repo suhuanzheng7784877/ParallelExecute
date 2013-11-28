@@ -3,9 +3,12 @@ package org.para.util.jar;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,11 +40,48 @@ public class ExtendsJarScanner {
 			512);
 
 	/**
+	 * 自己的类加载器
+	 */
+	private final static ClassLoader SystemClassLoader = ExtendsJarScanner.class
+			.getClassLoader();
+
+	/**
 	 * delete All ExtendsClassLoader And loaded class
 	 */
 	public static void deleteAll() {
 		Extends_Class_MAP.clear();
 		Extends_ClassLoader_MAP.clear();
+	}
+
+	/**
+	 * 本身classloader添加一个jar,进行加载
+	 * 
+	 * @param jarFilePath
+	 * @throws MalformedURLException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
+	public static boolean addSelfJarFile(String jarFilePath)
+			throws MalformedURLException, SecurityException,
+			NoSuchMethodException, IllegalArgumentException,
+			IllegalAccessException, InvocationTargetException {
+
+		Class<URLClassLoader> systemClass = URLClassLoader.class;
+		URLClassLoader urlClassLoader = (URLClassLoader) SystemClassLoader;
+
+		URL newUrl = new URL(jarFilePath);
+
+		Method method = systemClass.getDeclaredMethod("addURL",
+				new Class[] { URL.class });
+		method.setAccessible(true);
+		method.invoke(urlClassLoader, newUrl);
+		@SuppressWarnings("unused")
+		int jarFileSize = urlClassLoader.getURLs().length;
+
+		return true;
 	}
 
 	/**
@@ -161,6 +201,67 @@ public class ExtendsJarScanner {
 				if (jarFile != null) {
 					jarFile.close();
 					jarFile = null;
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * scan HTTP URI Jar Class
+	 * 
+	 * @param fileAbsolutePathString
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean scanFileClassAtSystemClassLoader(
+			String fileAbsolutePathString, boolean isRefresh)
+			throws IOException {
+		URL url = null;
+		InputStream is = null;
+		JarInputStream jarInputStream = null;
+		HttpURLConnection httpURLConnection = null;
+		ZipEntry zipEntry = null;
+		try {
+
+			Class<?> clazz = null;
+			String key = null;
+			String classFullName = null;
+
+			url = new URL(fileAbsolutePathString);
+
+			httpURLConnection = (HttpURLConnection) url.openConnection();
+			httpURLConnection.connect();
+			is = httpURLConnection.getInputStream();
+			jarInputStream = new JarInputStream(is);
+
+			while ((zipEntry = jarInputStream.getNextEntry()) != null) {
+				classFullName = zipEntry.getName();
+				if (classFullName.endsWith(".class")) {
+					classFullName = classFullName.substring(0,
+							classFullName.length() - 6);
+					classFullName = classFullName.replaceAll("/", ".");
+					clazz = SystemClassLoader.loadClass(classFullName);
+					key = fileAbsolutePathString + "@" + classFullName;
+					Extends_Class_MAP.put(key, clazz);
+				}
+			}
+			return true;
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+
+				url = null;
+				httpURLConnection = null;
+				zipEntry = null;
+
+				if (jarInputStream != null) {
+					jarInputStream.close();
+					jarInputStream = null;
 				}
 
 			} catch (IOException e) {

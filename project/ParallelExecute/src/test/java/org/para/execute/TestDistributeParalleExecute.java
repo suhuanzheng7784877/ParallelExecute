@@ -1,23 +1,25 @@
 package org.para.execute;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
-import org.para.constant.MQConstant;
+import org.para.distributed.dto.DistributedTaskMessage;
 import org.para.distributed.dto.WorkerNode;
 import org.para.distributed.master.DistributedParallelExecute;
+import org.para.distributed.master.MasterServer;
 import org.para.distributed.master.WorkerManagers;
-import org.para.distributed.mq.DistributedTaskMessage;
+import org.para.distributed.mq.StartJobJmsSend;
+import org.para.distributed.task.DistributedParallelTask;
 import org.para.distributed.util.MQMessageBuilder;
-import org.para.distributed.util.MQSender;
 import org.para.execute.model.TaskProperty;
-import org.para.execute.task.ParallelTask;
 import org.para.file.task.ByteCopyFileParallelTask;
 import org.para.trace.listener.FailEventListener;
 
+@SuppressWarnings("unused")
 public class TestDistributeParalleExecute {
 
 	@Test
@@ -27,12 +29,14 @@ public class TestDistributeParalleExecute {
 				1L, 1L, 0.9F);
 
 		WorkerNode workerNode2 = (WorkerNode) workerNode1.clone();
-		workerNode2.setWorkerIp("192.168.1.2");
+		workerNode2.setWorkerIp("192.168.137.1");
 		workerNode2.setFreememroy(512);
 		workerNode2.setCpufreerate(0.8F);
 
-		WorkerManagers.addWorkerNode(workerNode1);
-		WorkerManagers.addWorkerNode(workerNode2);
+		WorkerManagers.addOrReplaceWorkerNode(workerNode1);
+		WorkerManagers.addOrReplaceWorkerNode(workerNode2);
+
+		Set<WorkerNode> workerNodes = WorkerManagers.getWorkernodes();
 
 		// 选出最靠前的几个节点
 		List<WorkerNode> workerNodeList = WorkerManagers
@@ -41,7 +45,7 @@ public class TestDistributeParalleExecute {
 
 		TestDistributedParallelExecute testDistributedParallelExecute = new TestDistributedParallelExecute();
 
-		List<ParallelTask<?>> taskList = new ArrayList<ParallelTask<?>>();
+		List<DistributedParallelTask> taskList = new ArrayList<DistributedParallelTask>();
 
 		ByteCopyFileParallelTask byteCopyFileParallelTask1 = new ByteCopyFileParallelTask(
 				null, null, null, null);
@@ -52,47 +56,48 @@ public class TestDistributeParalleExecute {
 		ByteCopyFileParallelTask byteCopyFileParallelTask4 = new ByteCopyFileParallelTask(
 				null, null, null, null);
 
-		taskList.add(byteCopyFileParallelTask1);
-		taskList.add(byteCopyFileParallelTask2);
-		taskList.add(byteCopyFileParallelTask3);
-		taskList.add(byteCopyFileParallelTask4);
+		// taskList.add(byteCopyFileParallelTask1);
+		// taskList.add(byteCopyFileParallelTask2);
+		// taskList.add(byteCopyFileParallelTask3);
+		// taskList.add(byteCopyFileParallelTask4);
 
 		DistributedTaskMessage distributedTaskMessage = MQMessageBuilder
 				.buildDistributeTasks(11111L, taskList);
 		System.out.println(distributedTaskMessage);
 		// 调用mq接口进行分发
 
-		for (int i = 0; i < 100; i++) {
-			MQSender mqSender = new MQSender();
-			mqSender.sendTopicMessage(
-					MQConstant.START_DISTRIBUTED_TASK_TOPIC_Destination,
-					distributedTaskMessage);
-		}
+		MasterServer masterServer = new MasterServer();
+		StartJobJmsSend startJobJmsSend = testDistributedParallelExecute
+				.getStartJobJmsSend();
+
+		startJobJmsSend.sendJms(distributedTaskMessage);
 
 	}
 
 }
 
+@SuppressWarnings("rawtypes")
 class TestDistributedParallelExecute extends DistributedParallelExecute {
 
 	@Override
-	protected void init(Serializable sourceObject, Object... objects) {
+	protected void init(Map<String, String> sourceObjectConf) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	protected int analyzeResultCount(Serializable srcObject) {
+	protected int analyzeResultCount(Map<String, String> sourceObjectConf) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	protected ParallelTask buildParallelTask(CountDownLatch countDownLatch,
-			TaskProperty taskProperty, Serializable srcObject,
-			FailEventListener failEventListener, Object... objects) {
+	protected DistributedParallelTask buildDistributedParallelTask(
+			CountDownLatch countDownLatch, TaskProperty taskProperty,
+			Map<String, String> sourceObjectConf,
+			FailEventListener failEventListener) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 }

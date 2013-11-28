@@ -3,27 +3,35 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_45"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.26-bin.jar"/>
-	<classpathentry kind="lib" path="lib/commons-dbutils-1.5.jar" sourcepath="lib/commons-dbutils-1.5-sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-dbutils-1.5-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/commons-dbutils-1.5-sources.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="lib/activemq-all-5.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-2.9.3-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-2.9.3-sources.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-2.9.3.jar"/>
-	<classpathentry kind="lib" path="lib/protobuf-java-2.5.0.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/geronimo-jms_1.1_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-all-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-jmdns_1.0-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-optional-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-pool-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-spring-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/activemq-xmpp-5.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-dbutils-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/spring-aop-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-aspects-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-beans-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-context-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-context-support-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-core-3.2.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/spring-jms-3.2.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jms.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.26-bin.jar"/>
+	<classpathentry kind="lib" path="lib/protobuf-java-2.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-pool-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3.jar"/>
+	<classpathentry kind="lib" path="lib/libthrift-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-exec-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/xmemcached-1.4.3.jar"/>
+	<classpathentry kind="lib" path="lib/spring-aop-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-aspects-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-beans-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-support-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-core-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-expression-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-instrument-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-jms-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-tx-3.2.6.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
