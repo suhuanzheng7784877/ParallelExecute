@@ -37,7 +37,8 @@ public class WorkerManagers {
 	 * @return
 	 */
 	public static List<WorkerNode> selectTopFreeWorkerNode(int parallelNum) {
-
+		
+		//底层是数组拷贝，所以之后新加入的结点，不在候选范围中
 		List<WorkerNode> list = new ArrayList<WorkerNode>(workerNodes);
 		int listSize = list.size();
 		if (0 == listSize) {
@@ -57,7 +58,7 @@ public class WorkerManagers {
 		}
 
 		// 重新执行负载均衡，重新对资源池进行排序
-		reBlance(list);
+		reSortBlance(list);
 
 		return list.subList(0, parallelNum);
 	}
@@ -80,7 +81,7 @@ public class WorkerManagers {
 	 * @param list
 	 *            :候选资源的资源池集合
 	 */
-	public static void reBlance(List<WorkerNode> list) {
+	public static void reSortBlance(List<WorkerNode> list) {
 
 		// 开始资源排序，对候选节点资源进行排序
 		SortStrategy.sortCandidateList(list);

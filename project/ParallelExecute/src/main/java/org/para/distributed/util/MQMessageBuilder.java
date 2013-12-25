@@ -27,7 +27,7 @@ public class MQMessageBuilder {
 
 	/**
 	 * 分发任务逻辑
-	 * 
+	 * TODO:此处算法有待优化
 	 * @param jobId
 	 * @param taskList
 	 */
@@ -40,6 +40,7 @@ public class MQMessageBuilder {
 		int parallelNum = taskList.size();
 
 		// 选出最靠前的几个节点
+		// 优化选择算法
 		List<WorkerNode> workerNodeList = WorkerManagers
 				.selectTopFreeWorkerNode(parallelNum);
 

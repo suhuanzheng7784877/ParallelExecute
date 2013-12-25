@@ -40,7 +40,11 @@ public class DistributedParallelExecuteServiceImpl implements
 	public boolean startDistributedParallelExecute(String jarHttpURI,
 			String mainClassName, int parallelism_hint,
 			Map<String, String> parameterMap) throws TException {
+
+		long startTime = System.currentTimeMillis();
+		boolean executeResult = false;
 		try {
+
 			// 先扫描http形式的jar包
 			ExtendsClassLoaderFacade.scanJarFile(jarHttpURI, true);
 
@@ -48,6 +52,7 @@ public class DistributedParallelExecuteServiceImpl implements
 			Class<?> distributedParallelExecuteClazz = ExtendsClassLoaderFacade
 					.findClass(jarHttpURI, mainClassName);
 
+			// TODO:此处可以缓存，以后使用sha1或者md5算法进行相关二进制的换算，同样的结果，不需要加载二次
 			// 实例化一个并行任务
 			DistributedParallelExecute distributedParallelExecuteObject = (DistributedParallelExecute) distributedParallelExecuteClazz
 					.newInstance();
@@ -61,7 +66,8 @@ public class DistributedParallelExecuteServiceImpl implements
 			exeParalleJobMethod.invoke(distributedParallelExecuteObject,
 					jarHttpURI, parameterMap, parallelism_hint);
 
-			return true;
+			executeResult = true;
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			LOG.error("error", e);
@@ -88,7 +94,12 @@ public class DistributedParallelExecuteServiceImpl implements
 			LOG.error("error", e);
 		}
 
-		return false;
-	}
+		long endTime = System.currentTimeMillis();
+		long allSpendTime = endTime - startTime;
+		LOG.info("DistributedParallelExecute->jarHttpURI:" + jarHttpURI
+				+ ",mainClassName:" + mainClassName + ",parallelism_hint:"
+				+ parallelism_hint + ",allSpendTime:" + allSpendTime+"ms");
 
+		return executeResult;
+	}
 }

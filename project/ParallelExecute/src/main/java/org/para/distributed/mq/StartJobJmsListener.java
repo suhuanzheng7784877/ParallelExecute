@@ -115,14 +115,16 @@ public class StartJobJmsListener extends AbstractJmsRecive {
 	 */
 	private static String buildJavaCmd(long jobId, int taskId, String jarHttpURI) {
 		StringBuilder cmdSB = new StringBuilder(1024);
-		cmdSB.append("java -Xms").append(worker_heap_xms).append(" -Xmx")
+		cmdSB.append("java -Dpe.conf=").append(System.getProperty("pe.conf"))
+				.append(" -Djava.ext.dirs='")
+				.append(System.getProperty("java.ext.dirs")).append("' ")
+				.append(" -Xms").append(worker_heap_xms).append(" -Xmx")
 				.append(worker_heap_xmx).append(" -Xss")
 				.append(worker_stack_xss).append(" -XX:PermSize=")
 				.append(worker_PermSize).append(" -XX:MaxPermSize=")
-				.append(worker_MaxPermSize).append(" -cp '")
-				.append(SystemUtil.getSystemClassPath()).append("' ")
-				.append(EngineClassName).append(" ").append(jobId).append(" ")
-				.append(taskId).append(" ").append(jarHttpURI);
+				.append(worker_MaxPermSize).append(" ").append(EngineClassName).append(" ")
+				.append(jobId).append(" ").append(taskId).append(" ")
+				.append(jarHttpURI);
 
 		return cmdSB.toString();
 	}

@@ -36,7 +36,7 @@ public class DistributedParallelTaskExecuteEngine {
 			System.out.print("1001");
 			return;
 		}
-		
+
 		// 1-获取相关参数
 		// 任务ID
 		String jobIdStr = args[0];
@@ -46,11 +46,11 @@ public class DistributedParallelTaskExecuteEngine {
 		try {
 			// 2-进行子任务的类加载
 			ExtendsClassLoaderFacade.addSelfJarFile(jarHttpURI);
-			
+
 			// 3-从memcache中取出属于该任务的task类
 			DistributedParallelTask distributedParallelTask = ProgressContextMemcache
 					.getDistributedParallelTask(jobIdStr, taskIdStr);
-			
+
 			CountDownLatch countDownLatch = new CountDownLatch(1);
 			distributedParallelTask.setCountDownLatch(countDownLatch);
 			// 4-执行task的入口方法
@@ -59,11 +59,14 @@ public class DistributedParallelTaskExecuteEngine {
 
 			// 5-执行结束后返回信息给slave控制台
 			System.out.print("1000");
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.error("error", e);
 		} catch (InterruptedException e) {
+			e.printStackTrace();
+			log.error("error", e);
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("error", e);
 		}

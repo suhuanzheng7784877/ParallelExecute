@@ -1,5 +1,7 @@
 package org.para.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -22,12 +24,13 @@ public class PropertiesUtil {
 	private static Logger logger = Logger.getLogger(PropertiesUtil.class);
 
 	static {
-		InputStream in = PropertiesUtil.class
-				.getResourceAsStream("/distributed.properties");
+		String confPath = System.getProperty("pe.conf")+"/distributed.properties";
+		InputStream in = null;
 		try {
-			logger.info("load file properties");
+			in = new FileInputStream(new File(confPath));
+			logger.info("load properties file properties");
 			properties.load(in);
-			logger.info("load file properties finish");
+			logger.info("load properties file properties finish");
 		} catch (IOException e) {
 			logger.error("error", e);
 			e.printStackTrace();

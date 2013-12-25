@@ -12,8 +12,6 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 import org.apache.log4j.Logger;
 import org.para.distributed.task.DistributedParallelTask;
 import org.para.util.PropertiesUtil;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * 进程上下文操作,使用memcache作为进程上下文信息传递
@@ -91,103 +89,7 @@ public final class ProgressContextMemcache {
 //
 //	}
 
-	/**
-	 * 删除分布式子任务
-	 * 
-	 * @param jobId
-	 * @param taskId
-	 * @return
-	 */
-	public static boolean removeDistributedParallelTask(long jobId, int taskId) {
-		return removeDistributedParallelTask("" + jobId, "" + taskId);
-	}
 
-	/**
-	 * 删除分布式子任务
-	 * 
-	 * @param jobId
-	 * @param taskId
-	 * @return
-	 */
-	public static boolean removeDistributedParallelTask(String jobId, String taskId) {
-		MemcachedClient memcachedClient = null;
-		boolean result = false;
-		try {
-			memcachedClient = initSprintMemcacheClient();
-			String key = jobId + "" + taskId;
-			result = memcachedClient.delete(key);
-		} catch (MemcachedException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} catch (TimeoutException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} finally {
-			try {
-				memcachedClient.shutdown();
-				memcachedClient = null;
-			} catch (IOException e) {
-				e.printStackTrace();
-				logger.error("error", e);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * 将执行任务task也放进memcache中
-	 * 
-	 * @param jobId
-	 * @param taskId
-	 * @param distributedParallelTask
-	 * @return
-	 */
-	public static boolean putDistributedParallelTask(long jobId, int taskId,
-			DistributedParallelTask distributedParallelTask) {
-		return putDistributedParallelTask("" + jobId, "" + taskId, distributedParallelTask);
-	}
-
-	/**
-	 * 将执行任务task也放进memcache中
-	 * 
-	 * @param jobId
-	 * @param taskId
-	 * @param distributedParallelTask
-	 * @return
-	 */
-	public static boolean putDistributedParallelTask(String jobId, String taskId,
-			DistributedParallelTask distributedParallelTask) {
-		boolean result = false;
-		MemcachedClient memcachedClient = null;
-		try {
-			memcachedClient = initSprintMemcacheClient();
-			String key = jobId + ":" + taskId;
-			result = memcachedClient.set(key, memcacheCleanTimeout,
-					distributedParallelTask);
-		} catch (MemcachedException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} catch (TimeoutException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		} finally {
-			try {
-				memcachedClient.shutdown();
-				memcachedClient = null;
-			} catch (IOException e) {
-				e.printStackTrace();
-				logger.error("error", e);
-			}
-		}
-		return result;
-
-	}
 
 	/**
 	 * 获取子任务task
@@ -339,23 +241,7 @@ public final class ProgressContextMemcache {
 //		return result;
 //	}
 
-	/**
-	 * 从spring容器获取memcache客户端
-	 * 
-	 * @return
-	 */
-	private static MemcachedClient initSprintMemcacheClient() {
 
-		// 初始化master的配置文件
-		ApplicationContext MasterApplicationContext = new ClassPathXmlApplicationContext(
-				new String[] { "/applicationContext-master.xml" });
-
-		MemcachedClient memcachedClient = null;
-		memcachedClient = MasterApplicationContext.getBean("memcachedClient",
-				MemcachedClient.class);
-		return memcachedClient;
-
-	}
 
 	/**
 	 * 自己构建memcache客户端

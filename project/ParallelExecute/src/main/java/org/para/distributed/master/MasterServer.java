@@ -6,7 +6,7 @@ import org.para.distributed.thrift.server.DistributedParalleExecuteTHsHaServer;
 import org.para.trace.fail.strategy.DefaultFailHandleStrategy;
 import org.para.trace.listener.DefaultFailEventListener;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * 管理机器服务
@@ -27,8 +27,9 @@ public class MasterServer {
 	public volatile static boolean Is_Runing = true;
 
 	// 初始化
-	public final static ApplicationContext MasterApplicationContext = new ClassPathXmlApplicationContext(
-			new String[] { "/applicationContext-master.xml" });
+	public final static ApplicationContext MasterApplicationContext = new FileSystemXmlApplicationContext(
+			new String[] { "/" + System.getProperty("pe.conf")
+					+ "/applicationContext-master.xml" });
 
 	/**
 	 * 默认的任务执行异常跟踪器
@@ -37,6 +38,8 @@ public class MasterServer {
 			.getInstance(DefaultFailHandleStrategy.getInstance());
 
 	public static void main(String[] args) {
+
+		// 启动master server
 		startMaster();
 	}
 
@@ -47,9 +50,9 @@ public class MasterServer {
 	 */
 	public static void startMaster() {
 		Is_Runing = true;
-		LOG.info("管理结点开始守护..");
+		LOG.info("master starting...");
 		DistributedParalleExecuteTHsHaServer.getInstence().startTHsHaServer();
-		LOG.info("管理结点结束守护..");
+		LOG.info("master started");
 		System.exit(0);
 	}
 

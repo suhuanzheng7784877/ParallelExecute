@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
  * 
  */
 public class ExtendsClassLoaderFacade {
-	
+
 	/**
 	 * scan Jar File
 	 * 
@@ -21,28 +21,17 @@ public class ExtendsClassLoaderFacade {
 	 * @param isRefresh
 	 * @return
 	 * @throws IOException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws NoSuchMethodException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
 	 */
 	public static boolean addSelfJarFile(String jarFilePath)
-			throws IOException {
-		try {
-			return ExtendsJarScanner.addSelfJarFile(jarFilePath);
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
+			throws IOException, SecurityException, IllegalArgumentException,
+			NoSuchMethodException, IllegalAccessException,
+			InvocationTargetException {
+		return ExtendsJarScanner.addSelfJarFile(jarFilePath);
 	}
 
 	/**
@@ -57,7 +46,7 @@ public class ExtendsClassLoaderFacade {
 			throws IOException {
 		return ExtendsJarScanner.scanFileClass(jarFilePath, isRefresh);
 	}
-	
+
 	/**
 	 * scan Jar File
 	 * 
@@ -66,9 +55,10 @@ public class ExtendsClassLoaderFacade {
 	 * @return
 	 * @throws IOException
 	 */
-	public static boolean scanJarFileAtSystemClassLoader(String jarFilePath, boolean isRefresh)
-			throws IOException {
-		return ExtendsJarScanner.scanFileClassAtSystemClassLoader(jarFilePath, isRefresh);
+	public static boolean scanJarFileAtSystemClassLoader(String jarFilePath,
+			boolean isRefresh) throws IOException {
+		return ExtendsJarScanner.scanFileClassAtSystemClassLoader(jarFilePath,
+				isRefresh);
 	}
 
 	/**

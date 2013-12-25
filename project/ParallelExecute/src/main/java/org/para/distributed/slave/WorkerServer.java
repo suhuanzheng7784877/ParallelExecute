@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.para.util.PropertiesUtil;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * 工作结点机器服务
@@ -39,8 +39,9 @@ public class WorkerServer {
 			.getValue("worker.heartbeat.interval"));
 
 	// 初始化
-	public final static ApplicationContext WorkApplicationContext = new ClassPathXmlApplicationContext(
-			new String[] { "/applicationContext-slave.xml" });
+	public final static ApplicationContext WorkApplicationContext = new FileSystemXmlApplicationContext(
+			new String[] { "/"+System.getProperty("pe.conf")
+					+ "/applicationContext-slave.xml" });
 
 	/**
 	 * 程序入口
@@ -56,7 +57,7 @@ public class WorkerServer {
 	 */
 	public static void startWorker() {
 
-		LOG.info("启动工作节点进程.......");
+		LOG.info("starting slave.......");
 
 		startTask();
 
@@ -70,7 +71,7 @@ public class WorkerServer {
 				LOG.error("error", e);
 			}
 		}
-		LOG.info("工作结点结束守护..");
+		LOG.info("over slave");
 		System.exit(0);
 
 	}

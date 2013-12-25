@@ -25,13 +25,11 @@
 	<!--Java API doc-->
 	<property name="javadoc.dir" value="${deploy.dir}/doc" />
 
-	<!--配置文件路径-->
-	<property name="resource.dir" value="../src/conf" />
-
 	<!--项目源代码-->
-	<property name="source.java.dir" value="../src" />
-
-
+	<property name="source.java.dir" value="src/main/java" />
+	<property name="source.conf" value="conf" />
+	<!--配置文件路径-->
+	<property name="resource.dir" value="${deploy.dir}/conf" />
 
 	<!-- 设置jar文件名称 -->
 	<property name="jar.file" value="${ant.project.name}" />
@@ -64,7 +62,7 @@
 		<delete dir="${lib.dir}" />
 		<delete dir="${etc.dir}" />
 		<delete dir="${log.dir}" />
-		<delete dir="${classes.dir}/conf">
+		<delete dir="${resource.dir}">
 		</delete>
 	</target>
 
@@ -81,6 +79,7 @@
 		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${etc.dir}" />
 		<mkdir dir="${log.dir}" />
+		<mkdir dir="${resource.dir}" />
 	</target>
 
 	<!-- 编译环境 -->
@@ -115,9 +114,9 @@
 		-->
 		<!--删除classes文件夹-->
 		<delete dir="${classes.dir}">
-		
+
 		</delete>
-		
+
 
 	</target>
 
@@ -148,22 +147,20 @@
 
 	<target name="shell">
 		<copy file="${shell.file}" todir="${deploy.dir}" />
-		
 	</target>
 
 	<!-- 拷贝资源文件 -->
 	<target name="copy-resources">
-		<!--
-		<mkdir dir="{classes.dir}/conf"/>
-		-->
 		<!-- 拷贝资源文件到classes路径 -->
-		<!--
-		<copy todir="${classes.dir}/conf" overwrite="yes">
-			<fileset dir="${resource.dir}" includes="**/*" />
+
+		<copy todir="${resource.dir}" overwrite="yes">
+			<fileset dir="${source.conf}" includes="**/*" />
 		</copy>
-		-->
+		<copy file="${source.java.dir}/log4j.properties" todir="${classes.dir}" />
 		<copy file="start-master.bat" todir="${deploy.dir}" />
 		<copy file="start-slave.bat" todir="${deploy.dir}" />
+		<copy file="start-master.sh" todir="${deploy.dir}" />
+		<copy file="start-slave.sh" todir="${deploy.dir}" />
 	</target>
 
 	<!-- 生成javadoc文件 -->

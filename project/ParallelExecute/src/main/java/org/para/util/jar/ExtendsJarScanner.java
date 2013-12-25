@@ -183,7 +183,7 @@ public class ExtendsJarScanner {
 					entryName = entryName.substring(0, entryName.length() - 6);
 					entryName = entryName.replaceAll("/", ".");
 					clazz = extendsClassLoader.loadClass(entryName);
-					key = fileAbsolutePathString + "@" + entryName;
+					key = fileAbsolutePathString.concat("@").concat(entryName);
 					Extends_Class_MAP.put(key, clazz);
 				}
 			}
@@ -244,7 +244,7 @@ public class ExtendsJarScanner {
 							classFullName.length() - 6);
 					classFullName = classFullName.replaceAll("/", ".");
 					clazz = SystemClassLoader.loadClass(classFullName);
-					key = fileAbsolutePathString + "@" + classFullName;
+					key = fileAbsolutePathString.concat("@").concat(classFullName);
 					Extends_Class_MAP.put(key, clazz);
 				}
 			}
@@ -290,16 +290,19 @@ public class ExtendsJarScanner {
 			Class<?> clazz = null;
 			String key = null;
 			String classFullName = null;
+			
+			//ConcurrentHashMap，无线程安全隐患,若jar包同名，后面put的jar会将前面的覆盖
 			extendsClassLoader = getExtendsClassLoader(fileAbsolutePathString,
 					isRefresh);
-
+			
 			url = new URL(fileAbsolutePathString);
 
 			httpURLConnection = (HttpURLConnection) url.openConnection();
 			httpURLConnection.connect();
 			is = httpURLConnection.getInputStream();
 			jarInputStream = new JarInputStream(is);
-
+			
+			//全量扫描，将jar中所有的class进行加载后，将class元对象，放入缓存
 			while ((zipEntry = jarInputStream.getNextEntry()) != null) {
 				classFullName = zipEntry.getName();
 				if (classFullName.endsWith(".class")) {
@@ -307,7 +310,9 @@ public class ExtendsJarScanner {
 							classFullName.length() - 6);
 					classFullName = classFullName.replaceAll("/", ".");
 					clazz = extendsClassLoader.loadClass(classFullName);
-					key = fileAbsolutePathString + "@" + classFullName;
+					
+					//key是:jar包名@类全量名
+					key = fileAbsolutePathString.concat("@").concat(classFullName);
 					Extends_Class_MAP.put(key, clazz);
 				}
 			}
@@ -344,7 +349,7 @@ public class ExtendsJarScanner {
 	 */
 	public static Class<?> findClass(String fileAbsolutePathString,
 			String classFullName) throws ClassNotFoundException, IOException {
-		String key = fileAbsolutePathString + "@" + classFullName;
+		String key = fileAbsolutePathString.concat("@").concat(classFullName);
 
 		Class<?> clazz = Extends_Class_MAP.get(key);
 		if (clazz != null) {
@@ -376,7 +381,7 @@ public class ExtendsJarScanner {
 	public static Class<?> findClass(String fileAbsolutePathString,
 			String classFullName, boolean isRefresh)
 			throws ClassNotFoundException, IOException {
-		String key = fileAbsolutePathString + "@" + classFullName;
+		String key = fileAbsolutePathString.concat("@").concat(classFullName);
 
 		Class<?> clazz = Extends_Class_MAP.get(key);
 		if (clazz != null) {

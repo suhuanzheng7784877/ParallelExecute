@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.para.distributed.dto.MqMessage;
 import org.para.distributed.dto.ResponseExecuteResultMessageBean;
 import org.para.distributed.master.DistributedTaskManagers;
-import org.para.distributed.memcache.ProgressContextMemcache;
+import org.para.distributed.memcache.SpringInitContextMemcache;
 import org.para.distributed.task.DistributedParallelTask;
 import org.para.enums.TaskCycle;
 import org.para.execute.model.TaskProperty;
@@ -76,7 +76,7 @@ public class ResponseExecuteResultJmsListener extends AbstractJmsRecive {
 				// 分布式计数器增加一个
 				distributedParallelTask.getCountDownLatch().countDown();
 				// 删除memcache的task数据
-				ProgressContextMemcache.removeDistributedParallelTask(jobId, taskId);
+				SpringInitContextMemcache.removeDistributedParallelTask(jobId, taskId);
 				break;
 			}
 

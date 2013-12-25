@@ -8,6 +8,7 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.para.distributed.thrift.DistributedParallelExecuteService;
 import org.para.distributed.thrift.DistributedParallelExecuteServiceImpl;
+import org.para.util.PropertiesUtil;
 
 /**
  * 
@@ -21,8 +22,11 @@ import org.para.distributed.thrift.DistributedParallelExecuteServiceImpl;
  * 
  */
 public class DistributedParalleExecuteTHsHaServer {
-
-	public static final int SERVER_PORT = 8090;
+	
+	/**
+	 * master的thrift.port
+	 */
+	public static final int SERVER_PORT = Integer.parseInt(PropertiesUtil.getValue("master.thrift.port"));
 
 	/**
 	 * 
@@ -30,7 +34,7 @@ public class DistributedParalleExecuteTHsHaServer {
 	private DistributedParalleExecuteTHsHaServer() {
 
 	}
-
+	
 	private static DistributedParalleExecuteTHsHaServer distributedParalleExecuteTHsHaServer = new DistributedParalleExecuteTHsHaServer();
 
 	public static DistributedParalleExecuteTHsHaServer getInstence() {

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.para.constant.ParaConstant;
 import org.para.distributed.dto.DistributedTaskMessage;
-import org.para.distributed.memcache.ProgressContextMemcache;
+import org.para.distributed.memcache.SpringInitContextMemcache;
 import org.para.distributed.mq.StartJobJmsSend;
 import org.para.distributed.task.DistributedParallelTask;
 import org.para.distributed.util.MQMessageBuilder;
@@ -35,7 +35,10 @@ public abstract class DistributedParallelExecute {
 
 	private static Logger logger = Logger
 			.getLogger(DistributedParallelExecute.class);
-
+	
+	/**
+	 * 同样的任务实例，可以并发，无线程安全问题，因为每个任务实例是newInstence出来的对象
+	 */
 	public CountDownLatch countDownLatch = null;
 
 	/**
@@ -138,7 +141,7 @@ public abstract class DistributedParallelExecute {
 		// 生成jobid作为标识
 		long jobId = System.nanoTime();
 
-		// 进行执行逻辑,这里实际上是将任务进行分发，分发到各个子节点去执行
+		// 进行执行逻辑,这里实际上是将任务进行分发，分发到各个子节点去执行,此时已经是异步执行了
 		execute(jarHttpURI, jobId, taskPropertyArray, sourceObjectConf,
 				failEventListener);
 		try {
@@ -165,14 +168,17 @@ public abstract class DistributedParallelExecute {
 	protected TaskProperty[] splitJob(Map<String, String> sourceObjectConf,
 			int parallelism_hint) {
 
-		// count
+		// 可计量的任务总的数字count
 		int resultCount = analyzeResultCount(sourceObjectConf);
 
-		// actual block Num
+		// 实际的任务分块数目，也就是并行度，actual block Num
 		int currentBlockNum = (parallelism_hint <= 0 ? ParaConstant.DefaultFileBlockNum
 				: parallelism_hint);
-
+		
+		// 平均每个并行任务分摊的个数
 		int averageBlockSize = resultCount / currentBlockNum;
+		
+		// 最后一个任务分块的个数
 		int lastBlockSize = averageBlockSize + resultCount % currentBlockNum;
 
 		TaskProperty[] taskPropertyArray = new TaskProperty[currentBlockNum];
@@ -232,7 +238,7 @@ public abstract class DistributedParallelExecute {
 		int taskPropertyArrayLength = taskPropertyArray.length;
 
 		//
-		List<DistributedParallelTask> distributedParallelTaskList = new ArrayList<DistributedParallelTask>();
+		List<DistributedParallelTask> distributedParallelTaskList = new ArrayList<DistributedParallelTask>(taskPropertyArrayLength);
 
 		DistributedParallelTask distributedParallelTask = null;
 
@@ -243,9 +249,11 @@ public abstract class DistributedParallelExecute {
 					countDownLatch, taskPropertyArray[i], sourceObjectConf,
 					failEventListener);
 			distributedParallelTask.setJobId(jobId);
-			ProgressContextMemcache.putDistributedParallelTask(jobId,
-					taskPropertyArray[i].getTaskId(), distributedParallelTask);
 			distributedParallelTaskList.add(distributedParallelTask);
+			
+			//往memcache缓存中存储任务实体信息,费时间
+			SpringInitContextMemcache.putDistributedParallelTask(jobId,
+					taskPropertyArray[i].getTaskId(), distributedParallelTask);
 
 		}
 
@@ -254,14 +262,12 @@ public abstract class DistributedParallelExecute {
 				.buildDistributeTasks(jobId, distributedParallelTaskList);
 		distributedTaskMessage.setJarHttpURI(jarHttpURI);
 
-		logger.info("putTaskMapConf :" + distributedTaskMessage);
-
 		// 调用mq接口进行分发
 		logger.info("send distributedTaskMessage :" + distributedTaskMessage);
 
 		startJobJmsSend.sendJms(distributedTaskMessage);
 
-		// 任务池暂存正在[运行的任务]
+		// 任务池暂存正在[运行的任务],放入内存中
 		DistributedTaskManagers.getDistributedTaskManagerInstence()
 				.putParallelTaskList(jobId, distributedParallelTaskList);
 

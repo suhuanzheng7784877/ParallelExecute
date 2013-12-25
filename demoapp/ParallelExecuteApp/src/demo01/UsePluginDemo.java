@@ -151,22 +151,72 @@ public class UsePluginDemo {
 	@Test
 	public void test03Http() {
 		// 1
-		String fileAbsolutePathString1 = "http://127.0.0.1/ParalleExecutePlugin2_fat.jar";
+		String fileAbsolutePathString1 = "http://192.168.137.1/ParalleExecutePlugin2_fat.jar";
 
 		// 2
 		String mainClassName = "distributed.MysqlDistributedParallelExecute";
 
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("Driver", "com.mysql.jdbc.Driver");
-		map.put("url", "jdbc:mysql://127.0.0.1:3306/test");
+		map.put("url", "jdbc:mysql://192.168.137.1:3306/test");
 		map.put("name", "root");
 		map.put("password", "111111");
 
 		try {
 			distributedParallelExecuteClient.startDistributedParallelExecute(
-					fileAbsolutePathString1, mainClassName, 4, map);
+					fileAbsolutePathString1, mainClassName, 3, map);
 		} catch (ParallelException e) {
 			e.printStackTrace();
 		}
 	}
+
+	@Test
+	public void test04并发Http() {
+
+		new Thread(new A()).start();
+
+		new Thread(new A()).start();
+
+		try {
+			Thread.sleep(120000L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+}
+
+class A implements Runnable {
+
+	@Override
+	public void run() {
+
+		String ip = "192.168.137.1";
+		int port = 8090;
+		int timeout = Integer.MAX_VALUE;
+
+		DistributedParallelExecuteClient distributedParallelExecuteClient = new DistributedParallelExecuteClient(
+				ip, port, timeout);
+
+		// 1
+		String fileAbsolutePathString1 = "http://192.168.137.1/ParalleExecutePlugin2_fat.jar";
+
+		// 2
+		String mainClassName = "distributed.MysqlDistributedParallelExecute";
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("Driver", "com.mysql.jdbc.Driver");
+		map.put("url", "jdbc:mysql://192.168.137.1:3306/test");
+		map.put("name", "root");
+		map.put("password", "111111");
+
+		try {
+			distributedParallelExecuteClient.startDistributedParallelExecute(
+					fileAbsolutePathString1, mainClassName, 1, map);
+		} catch (ParallelException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }
