@@ -21,8 +21,6 @@
 	<!-- server -->
 	<bean id="memcachedClientBuilder" class="net.rubyeye.xmemcached.XMemcachedClientBuilder"
 		p:connectionPoolSize="${memcached.connectionPoolSize}" p:failureMode="${memcached.failureMode}">
-		<!-- XMemcachedClientBuilder have two arguments.First is server list,and 
-			second is weights array. -->
 		<constructor-arg>
 			<list>
 				<bean class="java.net.InetSocketAddress">
@@ -38,11 +36,6 @@
 		<constructor-arg>
 			<list>
 				<value>${memcached.server1.weight}</value>
-				<!--  
-				<value>${memcached.server2.weight}</value>
-				<value>${memcached.server3.weight}</value>
-				<value>${memcached.server4.weight}</value>
-				-->
 			</list>
 		</constructor-arg>
 		<property name="commandFactory">
@@ -51,10 +44,19 @@
 		<property name="sessionLocator">
 			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator" />
 		</property>
-		<property name="transcoder">
-			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		<property name="transcoder" ref="transcoder">
 		</property>
 	</bean>
+
+	<!-- 序列化数据进行了压缩的,xmemcache默认是16k,此处是4k -->
+	<bean id="transcoder"
+		class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder">
+		<property name="compressionThreshold">
+			<value>${memcached.compressionThreshold}</value>
+		</property>
+	</bean>
+
+
 	<!-- Use factory bean to build memcached client -->
 	<bean id="memcachedClient" factory-bean="memcachedClientBuilder"
 		factory-method="build" destroy-method="shutdown" />

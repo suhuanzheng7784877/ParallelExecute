@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
@@ -89,7 +89,7 @@ public class DistributedParallelExecuteClient {
 				serverTimeout == -1 ? DEFAULE_TIMEOUT : serverTimeout));
 
 		// 协议要和服务端一致
-		TProtocol protocol = new TBinaryProtocol(transport);
+		TProtocol protocol = new TCompactProtocol(transport);
 		DistributedParallelExecuteService.Client client = new DistributedParallelExecuteService.Client(
 				protocol);
 		try {

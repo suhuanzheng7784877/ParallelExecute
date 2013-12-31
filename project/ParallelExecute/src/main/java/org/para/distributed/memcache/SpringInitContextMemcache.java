@@ -8,6 +8,7 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
 import org.apache.log4j.Logger;
+import org.para.constant.ParaConstant;
 import org.para.distributed.master.MasterServer;
 import org.para.distributed.task.DistributedParallelTask;
 
@@ -73,7 +74,7 @@ public class SpringInitContextMemcache {
 					+ "++++++++memcachedClient+++++++::"
 					+ memcachedClient.toString());
 			result = memcachedClient.set(key,
-					ProgressContextMemcache.memcacheCleanTimeout,
+					ParaConstant.memcacheCleanTimeout,
 					distributedParallelTask);
 		} catch (MemcachedException e) {
 			e.printStackTrace();

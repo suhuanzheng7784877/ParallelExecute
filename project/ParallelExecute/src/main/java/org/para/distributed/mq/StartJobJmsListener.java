@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
+import org.para.constant.ParaConstant.SlaveConstant;
 import org.para.distributed.dto.DistributedTaskMessage;
 import org.para.distributed.dto.MqMessage;
 import org.para.distributed.dto.ResponseExecuteResultMessageBean;
@@ -16,7 +17,6 @@ import org.para.distributed.util.ExecUtil;
 import org.para.distributed.util.SystemUtil;
 import org.para.enums.TaskCycle;
 import org.para.execute.model.TaskProperty;
-import org.para.util.PropertiesUtil;
 
 /**
  * 
@@ -33,31 +33,13 @@ public class StartJobJmsListener extends AbstractJmsRecive {
 
 	private static Logger logger = Logger.getLogger(StartJobJmsListener.class);
 
-	/**
-	 * 执行子任务的引擎类
-	 */
-	private static final String EngineClassName = PropertiesUtil
-			.getValue("worker.EngineClassName");
-
 	final static WorkerNode localWorkerNode = WorkerNode.getSingle();
-
-	public static final String worker_heap_xmx = PropertiesUtil
-			.getValue("worker.heap.xmx");
-	public static final String worker_heap_xms = PropertiesUtil
-			.getValue("worker.heap.xms");
-	public static final String worker_stack_xss = PropertiesUtil
-			.getValue("worker.stack.xss");
-	public static final String worker_PermSize = PropertiesUtil
-			.getValue("worker.PermSize");
-	public static final String worker_MaxPermSize = PropertiesUtil
-			.getValue("worker.MaxPermSize");
 
 	/**
 	 * 执行接收jms后的处理线程池
 	 */
 	private final static ExecutorService StartTasksThreadPool = Executors
-			.newFixedThreadPool(Integer.parseInt(PropertiesUtil
-					.getValue("worker.start.tasks.threadpool.size")));
+			.newFixedThreadPool(SlaveConstant.worker_start_threadpool_size);
 
 	public StartJobJmsListener() {
 		logger.info("init StartJobJmsListener");
@@ -114,17 +96,11 @@ public class StartJobJmsListener extends AbstractJmsRecive {
 	 * @return
 	 */
 	private static String buildJavaCmd(long jobId, int taskId, String jarHttpURI) {
-		StringBuilder cmdSB = new StringBuilder(1024);
-		cmdSB.append("java -Dpe.conf=").append(System.getProperty("pe.conf"))
-				.append(" -Djava.ext.dirs='")
-				.append(System.getProperty("java.ext.dirs")).append("' ")
-				.append(" -Xms").append(worker_heap_xms).append(" -Xmx")
-				.append(worker_heap_xmx).append(" -Xss")
-				.append(worker_stack_xss).append(" -XX:PermSize=")
-				.append(worker_PermSize).append(" -XX:MaxPermSize=")
-				.append(worker_MaxPermSize).append(" ").append(EngineClassName).append(" ")
-				.append(jobId).append(" ").append(taskId).append(" ")
-				.append(jarHttpURI);
+		StringBuilder cmdSB = new StringBuilder(768);
+		
+		//构建java启动命令
+		cmdSB.append(SlaveConstant.StartJVMPrefix).append(jobId).append(" ")
+				.append(taskId).append(" ").append(jarHttpURI);
 
 		return cmdSB.toString();
 	}

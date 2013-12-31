@@ -2,6 +2,7 @@ package org.para.distributed.master;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.para.constant.ParaConstant;
 import org.para.distributed.thrift.server.DistributedParalleExecuteTHsHaServer;
 import org.para.trace.fail.strategy.DefaultFailHandleStrategy;
 import org.para.trace.listener.DefaultFailEventListener;
@@ -28,7 +29,7 @@ public class MasterServer {
 
 	// 初始化
 	public final static ApplicationContext MasterApplicationContext = new FileSystemXmlApplicationContext(
-			new String[] { "/" + System.getProperty("pe.conf")
+			new String[] { "/" + ParaConstant.PE_CONF
 					+ "/applicationContext-master.xml" });
 
 	/**

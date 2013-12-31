@@ -10,8 +10,8 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import org.apache.log4j.Logger;
+import org.para.constant.ParaConstant;
 import org.para.distributed.task.DistributedParallelTask;
-import org.para.util.PropertiesUtil;
 
 /**
  * 进程上下文操作,使用memcache作为进程上下文信息传递
@@ -27,18 +27,6 @@ public final class ProgressContextMemcache {
 
 	private static Logger logger = Logger
 			.getLogger(ProgressContextMemcache.class);
-
-	// memcache server
-	public final static String memcacheServerURI = PropertiesUtil
-			.getValue("memcache1.server");
-
-	// memcache port
-	public final static String memcacheServerPort = PropertiesUtil
-			.getValue("memcache1.port");
-
-	// memcache clean time out
-	public final static int memcacheCleanTimeout = Integer
-			.parseInt(PropertiesUtil.getValue("memcache1.clean.timeout"));
 
 //	/**
 //	 * 将子节点执行的任务上下文需要的配置放到memcache中，以便在子task中取出相关上下文配置信息,master进行put
@@ -252,8 +240,8 @@ public final class ProgressContextMemcache {
 	private static MemcachedClient initMemcacheClient() throws IOException {
 		// 构建client端的链接
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-				AddrUtil.getAddresses(memcacheServerURI + ":"
-						+ memcacheServerPort));
+				AddrUtil.getAddresses(ParaConstant.memcacheServerURI + ":"
+						+ ParaConstant.memcacheServerPort));
 		MemcachedClient memcachedClient = builder.build();
 		return memcachedClient;
 	}

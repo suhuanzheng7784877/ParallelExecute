@@ -62,6 +62,7 @@ public class SortCPUAndMemroyComparator implements Comparator<WorkerNode> {
 		float node1MemroyFreeRate = workerNode.getFreememroy();
 
 		// node1-的综合值
+		// TODO:此处算法的权重需要可配置，客户端可以根据自己的场景需求进行权重配置
 		float node1PowerValue = node1CpuFreeRate * 0.5F * 100.0F
 				+ node1MemroyFreeRate * (1 - 0.5f) * 100;
 

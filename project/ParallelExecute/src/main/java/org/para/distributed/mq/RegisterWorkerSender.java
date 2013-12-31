@@ -26,15 +26,6 @@ public class RegisterWorkerSender implements Runnable {
 
 	@Override
 	public void run() {
-
-		try {
-
-			// 先睡5秒钟
-			Thread.sleep(5000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			logger.error("error", e);
-		}
 		try {
 			WorkerNode workerNode = SystemUtil.getWorkerNode(false);
 

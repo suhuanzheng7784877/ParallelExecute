@@ -4,7 +4,8 @@ import java.util.Timer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.para.util.PropertiesUtil;
+import org.para.constant.ParaConstant;
+import org.para.constant.ParaConstant.SlaveConstant;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -26,21 +27,9 @@ public class WorkerServer {
 
 	private final static Log LOG = LogFactory.getLog(WorkerServer.class);
 
-	// 睡眠时间
-	public final static long SLEEP_TIME = Long.parseLong(PropertiesUtil
-			.getValue("worker.sleep.interval"));
-
-	// 等待心跳任务启动的时间
-	public final static long WATI_Heartbeat_TIME = Long
-			.parseLong(PropertiesUtil.getValue("worker.wait.heartbeat.time"));
-
-	// 心跳的时间频率
-	public final static long Heartbeat_TIME = Long.parseLong(PropertiesUtil
-			.getValue("worker.heartbeat.interval"));
-
 	// 初始化
 	public final static ApplicationContext WorkApplicationContext = new FileSystemXmlApplicationContext(
-			new String[] { "/"+System.getProperty("pe.conf")
+			new String[] { "/" + ParaConstant.PE_CONF
 					+ "/applicationContext-slave.xml" });
 
 	/**
@@ -64,7 +53,7 @@ public class WorkerServer {
 		while (Is_Runing) {
 			// 发送心跳
 			try {
-				Thread.sleep(SLEEP_TIME);
+				Thread.sleep(SlaveConstant.SLEEP_TIME);
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -111,7 +100,8 @@ public class WorkerServer {
 		Timer timer = new Timer();
 
 		// 第2个参数是几毫秒后开始，第3个参数是每隔几毫秒进行一次任务的执行
-		timer.schedule(new HeartbeatTask(), WATI_Heartbeat_TIME, Heartbeat_TIME);
+		timer.schedule(new HeartbeatTask(), SlaveConstant.WATI_Heartbeat_TIME,
+				SlaveConstant.Heartbeat_TIME);
 
 	}
 

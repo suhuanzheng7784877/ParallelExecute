@@ -7,6 +7,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
+import org.para.constant.ParaConstant.SlaveConstant;
 
 /**
  * 执行脚本命令封装
@@ -22,11 +23,7 @@ public class ExecUtil {
 
 	private static Logger logger = Logger.getLogger(ExecUtil.class);
 
-	private final static String encode = "GBK";
 
-	public final static String SUCESS_CODE = "1000";
-
-	public final static String ERROR_CODE = "1001";
 
 	/**
 	 * 执行命令
@@ -56,13 +53,13 @@ public class ExecUtil {
 
 			exec.setStreamHandler(streamHandler);
 			exec.execute(commandline);
-			String out = outputStream.toString(encode);
-			String error = errorStream.toString(encode);
+			String out = outputStream.toString(SlaveConstant.encode);
+			String error = errorStream.toString(SlaveConstant.encode);
 			logger.info("==============exec start=====================");
 			System.out.println(out + error);
 			logger.info("==============exec over======================");
-			if (-1 != out.lastIndexOf(SUCESS_CODE,
-					out.length() - SUCESS_CODE.length())) {
+			if (-1 != out.lastIndexOf(SlaveConstant.SUCESS_CODE,
+					out.length() - SlaveConstant.SUCESS_CODE.length())) {
 				return true;
 			}
 		} catch (Exception e) {

@@ -8,9 +8,11 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.para.constant.ParaConstant;
 
 /**
  * 读取Properties文件的内容
+ * 
  * @author liuyan
  * @Email:suhuanzheng7784877@163.com
  * @version 0.1
@@ -24,7 +26,8 @@ public class PropertiesUtil {
 	private static Logger logger = Logger.getLogger(PropertiesUtil.class);
 
 	static {
-		String confPath = System.getProperty("pe.conf")+"/distributed.properties";
+		String confPath = ParaConstant.PE_CONF + "/"
+				+ ParaConstant.Distributed_Properties;
 		InputStream in = null;
 		try {
 			in = new FileInputStream(new File(confPath));

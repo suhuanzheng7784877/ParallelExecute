@@ -1,7 +1,7 @@
 package org.para.distributed.thrift.server;
 
 import org.apache.thrift.TProcessor;
-import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.server.THsHaServer;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TFramedTransport;
@@ -22,11 +22,12 @@ import org.para.util.PropertiesUtil;
  * 
  */
 public class DistributedParalleExecuteTHsHaServer {
-	
+
 	/**
 	 * master的thrift.port
 	 */
-	public static final int SERVER_PORT = Integer.parseInt(PropertiesUtil.getValue("master.thrift.port"));
+	public static final int SERVER_PORT = Integer.parseInt(PropertiesUtil
+			.getValue("master.thrift.port"));
 
 	/**
 	 * 
@@ -34,7 +35,7 @@ public class DistributedParalleExecuteTHsHaServer {
 	private DistributedParalleExecuteTHsHaServer() {
 
 	}
-	
+
 	private static DistributedParalleExecuteTHsHaServer distributedParalleExecuteTHsHaServer = new DistributedParalleExecuteTHsHaServer();
 
 	public static DistributedParalleExecuteTHsHaServer getInstence() {
@@ -54,9 +55,15 @@ public class DistributedParalleExecuteTHsHaServer {
 			TNonblockingServerSocket tnbSocketTransport = new TNonblockingServerSocket(
 					SERVER_PORT);
 			THsHaServer.Args thhsArgs = new THsHaServer.Args(tnbSocketTransport);
+
+			// 设置处理逻辑
 			thhsArgs.processor(tprocessor);
+
+			// 传输方式
 			thhsArgs.transportFactory(new TFramedTransport.Factory());
-			thhsArgs.protocolFactory(new TBinaryProtocol.Factory());
+
+			// 数据协议
+			thhsArgs.protocolFactory(new TCompactProtocol.Factory());
 
 			// 半同步半异步的服务模型
 			server = new THsHaServer(thhsArgs);
