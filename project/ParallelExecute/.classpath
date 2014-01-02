@@ -16,10 +16,7 @@
 	<classpathentry kind="lib" path="lib/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.26-bin.jar"/>
-	<classpathentry kind="lib" path="lib/protobuf-java-2.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-pool-1.6.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="lib/libthrift-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-exec-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xmemcached-1.4.3.jar" sourcepath="F:/迅雷下载/xmemcached-1.4.3-src/src/main/java"/>
@@ -33,5 +30,6 @@
 	<classpathentry kind="lib" path="lib/spring-instrument-3.2.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-jms-3.2.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-tx-3.2.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/zookeeper-3.4.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

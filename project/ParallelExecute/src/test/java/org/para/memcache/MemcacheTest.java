@@ -12,19 +12,22 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import org.junit.Test;
+import org.para.constant.ParaConstant;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 public class MemcacheTest {
 
 	// 初始化
-	public final static ApplicationContext WorkApplicationContext = new ClassPathXmlApplicationContext(
-			new String[] { "/applicationContext-slave.xml" });
+	public final static ApplicationContext WorkApplicationContext = new FileSystemXmlApplicationContext(
+			new String[] { "/" + ParaConstant.PE_CONF
+					+ "/applicationContext-slave.xml" });
 
 	@Test
 	public void test01() {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-				AddrUtil.getAddresses("localhost:11211"));
+				AddrUtil.getAddresses("localhost:11111"));
 		try {
 			MemcachedClient memcachedClient = builder.build();
 
@@ -45,8 +48,15 @@ public class MemcacheTest {
 			
 			Map map1 = memcachedClient.get("cache1");
 			
-			memcachedClient.shutdown();
+			//memcachedClient.shutdown();
 			System.out.println("map1:::"+map1);
+			
+			
+			Thread.sleep(30000L);
+			memcachedClient.addServer("localhost:11211");
+			while(true){
+				Thread.sleep(Integer.MAX_VALUE);
+			}
 			
 		} catch (MemcachedException e) {
 			System.err.println("MemcachedClient operation fail");
@@ -58,6 +68,22 @@ public class MemcacheTest {
 			// ignore
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void addServer(){
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses("localhost:11111"));
+		try {
+			MemcachedClient memcachedClient = builder.build();
+			
+			memcachedClient.addServer("localhost:11211");
+			
+			
+		} catch (Exception e) {
+			System.err.println("MemcachedClient operation fail");
 			e.printStackTrace();
 		}
 	}
