@@ -186,12 +186,12 @@ public abstract class DistributedParallelExecute {
 
 			if (i == currentBlockNum - 1) {
 				taskPropertyArray[i] = new TaskProperty(i + 1, resultCount, i,
-						lastBlockSize);
+						lastBlockSize,averageBlockSize);
 				break;
 			}
 
 			taskPropertyArray[i] = new TaskProperty(i + 1, resultCount, i,
-					averageBlockSize);
+					averageBlockSize,averageBlockSize);
 		}
 
 		return taskPropertyArray;

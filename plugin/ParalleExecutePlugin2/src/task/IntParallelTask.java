@@ -16,15 +16,21 @@ public class IntParallelTask extends ParallelTask<int[]> {
 	}
 
 	@Override
-	protected int execute(int[] sourceJobObject, int blockSize, int countBlock,
-			int currentBlockIndex) throws Exception {
+	protected int execute(int[] sourceJobObject, int currentBlockSize, int countBlock,
+			int currentBlockIndex,int averageBlockSize) throws Exception {
 
-		int startIndex = currentBlockIndex * blockSize;
-		int endIndex = currentBlockIndex * blockSize + blockSize;
-		for (int i = startIndex; i < endIndex; i++) {
+		int startIndex = currentBlockIndex * averageBlockSize;
+		int endIndex = currentBlockIndex * averageBlockSize + currentBlockSize;
+
+		System.out.println("ThreadId" + Thread.currentThread().getId()
+				+ "___currentBlockSize:" + currentBlockSize + "__countBlock:" + countBlock
+				+ "___currentBlockIndex:" + currentBlockIndex + "__startIndex:"
+				+ startIndex + "___endIndex:" + endIndex);
+
+		for (int i = 0; i < currentBlockSize; i++) {
 			MessageOutUtil
 					.SystemOutPrint("ThreadId" + Thread.currentThread().getId()
-							+ ":" + sourceJobObject[i]);
+							+ ":" + sourceJobObject[startIndex+i]);
 		}
 		return currentBlockIndex;
 

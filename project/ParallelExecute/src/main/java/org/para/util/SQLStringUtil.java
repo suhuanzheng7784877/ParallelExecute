@@ -23,15 +23,15 @@ public class SQLStringUtil {
 	 * @return
 	 */
 	public static String appendSplitPage(DbSourceJobType sourceJobObject,
-			int blockSize, int countBlock, int currentBlockIndex) {
+			int currentBlockSize, int countBlock, int currentBlockIndex,int averageBlockSize) {
 
 		DbType dbType = sourceJobObject.getDbType();
 		StringBuilder sourceSqlStringBuffer = new StringBuilder(
 				sourceJobObject.getSourceSelectSql());
-		int startIndex = currentBlockIndex * blockSize;
+		int startIndex = currentBlockIndex * averageBlockSize;
 		if (dbType == DbType.MYSQL) {
 			sourceSqlStringBuffer.append(" LIMIT ").append(startIndex)
-					.append(",").append(blockSize);
+					.append(",").append(currentBlockSize);
 		}
 		return sourceSqlStringBuffer.toString();
 	}

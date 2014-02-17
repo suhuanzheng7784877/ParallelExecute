@@ -52,11 +52,12 @@ public abstract class ParallelTask<T> implements Runnable,Serializable {
 	@Override
 	public void run() {
 
-		int blockSize = taskProperty.getBlockSize();
+		int averageBlockSize = taskProperty.getAverageBlockSize();
+		int currentBlockSize = taskProperty.getCurrentBlockSize();
 		int countBlock = taskProperty.getCountBlock();
 		int currentBlockIndex = taskProperty.getCurrentBlockIndex();
 		try {
-			this.execute(targetObject, blockSize, countBlock, currentBlockIndex);
+			this.execute(targetObject, currentBlockSize, countBlock, currentBlockIndex,averageBlockSize);
 		} catch (Exception runtimeException) {
 			taskProperty.setTaskCycle(TaskCycle.TASK_ERROR);
 			runtimeException.printStackTrace();
@@ -76,8 +77,8 @@ public abstract class ParallelTask<T> implements Runnable,Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract int execute(T sourceJobObject, int blockSize,
-			int countBlock, int currentBlockIndex) throws Exception;
+	protected abstract int execute(T sourceJobObject, int currentBlockSize,
+			int countBlock, int currentBlockIndex,int averageBlockSize) throws Exception;
 
 	@Override
 	public String toString() {

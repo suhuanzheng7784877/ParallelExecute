@@ -90,11 +90,35 @@ public class TestFileParallelExecute {
 	}
 	
 	@Test
+	public void testEclipseCopy() {
+		
+		//1-指定源任务 与 目标任务
+		String srcName = "E:/ECLIPSE.ZIP";
+		String targetName = "C:/ECLIPSE.ZIP";
+		File srcFile = new File(srcName);
+		File target = new File(targetName);
+		if (target.exists()) {
+			target.delete();
+		}
+		FileParallelExecute fileParallelExecute = new ByteFileParallelExecute();
+		
+		try {
+			long start = System.currentTimeMillis();
+			fileParallelExecute.exeParalleJob(srcFile, 4,targetName);
+			long end = System.currentTimeMillis();
+			MessageOutUtil.SystemOutPrint("time:"+(end-start)+"ms");
+		} catch (ParallelException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	@Test
 	public void testFailEventListener() {
 		
 		//1-指定源任务 与 目标任务
-		String srcName = "E:/ECLIPSE-JEE-3.7-INDIGO-SR2-WIN32.ZIP";
-		String targetName = "C:/ECLIPSE-JEE-3.7-INDIGO-SR2-WIN32.ZIP";
+		String srcName = "E:/ECLIPSE.ZIP";
+		String targetName = "C:/ECLIPSE.ZIP";
 		File srcFile = new File(srcName);
 		File target = new File(targetName);
 		if (target.exists()) {
@@ -106,7 +130,7 @@ public class TestFileParallelExecute {
 		
 		try {
 			long start = System.currentTimeMillis();
-			fileParallelExecute.exeParalleJob(srcFile, 2, failEventListener, targetName);
+			fileParallelExecute.exeParalleJob(srcFile, 4, failEventListener, targetName);
 			long end = System.currentTimeMillis();
 			MessageOutUtil.SystemOutPrint("time:"+(end-start)+"ms");
 		} catch (ParallelException e) {

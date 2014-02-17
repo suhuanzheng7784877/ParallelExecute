@@ -36,8 +36,8 @@ public class MysqlDistributedParallelTask extends DistributedParallelTask {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected int execute(Map<String, String> targetObjectConf, int blockSize,
-			int countBlock, int currentBlockIndex) throws Exception {
+	protected int execute(Map<String, String> targetObjectConf, int currentBlockSize,
+			int countBlock, int currentBlockIndex,int averageBlockSize) throws Exception {
 
 		// Class.forName("com.mysql.jdbc.Driver");
 		// String url = "jdbc:mysql://127.0.0.1:3306/test";
@@ -49,11 +49,11 @@ public class MysqlDistributedParallelTask extends DistributedParallelTask {
 
 		Class.forName(Driver);
 
-		int start = currentBlockIndex * blockSize;
+		int start = currentBlockIndex * averageBlockSize;
 		Connection con = DriverManager.getConnection(url, root, password);
 		Statement statement = con.createStatement();
 
-		String sql = "SELECT * FROM person LIMIT " + start + "," + blockSize;
+		String sql = "SELECT * FROM person LIMIT " + start + "," + currentBlockSize;
 		System.out.println("sql::::" + sql);
 		System.out.println("plugin-version 2 ");
 		ResultSet resultSet = statement.executeQuery(sql);

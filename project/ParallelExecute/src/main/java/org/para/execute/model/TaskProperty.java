@@ -33,11 +33,12 @@ public final class TaskProperty implements Cloneable, Serializable {
 	 *            ：blockSize
 	 */
 	public TaskProperty(int taskId, int countBlock, int currentBlockIndex,
-			int blockSize) {
+			int currentBlockSize,int averageBlockSize) {
 		this.taskId = taskId;
 		this.countBlock = countBlock;
 		this.currentBlockIndex = currentBlockIndex;
-		this.blockSize = blockSize;
+		this.currentBlockSize = currentBlockSize;
+		this.averageBlockSize = averageBlockSize;
 	}
 
 	private int taskId;
@@ -48,7 +49,9 @@ public final class TaskProperty implements Cloneable, Serializable {
 
 	private int currentBlockIndex;
 
-	private int blockSize;
+	private int currentBlockSize;
+	
+	private int averageBlockSize;
 
 	public int getTaskId() {
 		return taskId;
@@ -82,12 +85,20 @@ public final class TaskProperty implements Cloneable, Serializable {
 		this.currentBlockIndex = currentBlockIndex;
 	}
 
-	public int getBlockSize() {
-		return blockSize;
+	public int getCurrentBlockSize() {
+		return currentBlockSize;
 	}
 
-	public void setBlockSize(int blockSize) {
-		this.blockSize = blockSize;
+	public void setCurrentBlockSize(int currentBlockSize) {
+		this.currentBlockSize = currentBlockSize;
+	}
+
+	public int getAverageBlockSize() {
+		return averageBlockSize;
+	}
+
+	public void setAverageBlockSize(int averageBlockSize) {
+		this.averageBlockSize = averageBlockSize;
 	}
 
 	@Override
@@ -99,11 +110,6 @@ public final class TaskProperty implements Cloneable, Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + blockSize;
-		result = prime * result + countBlock;
-		result = prime * result + currentBlockIndex;
-		result = prime * result
-				+ ((taskCycle == null) ? 0 : taskCycle.hashCode());
 		result = prime * result + taskId;
 		return result;
 	}
@@ -117,14 +123,6 @@ public final class TaskProperty implements Cloneable, Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TaskProperty other = (TaskProperty) obj;
-		if (blockSize != other.blockSize)
-			return false;
-		if (countBlock != other.countBlock)
-			return false;
-		if (currentBlockIndex != other.currentBlockIndex)
-			return false;
-		if (taskCycle != other.taskCycle)
-			return false;
 		if (taskId != other.taskId)
 			return false;
 		return true;
@@ -134,7 +132,8 @@ public final class TaskProperty implements Cloneable, Serializable {
 	public String toString() {
 		return "TaskProperty [taskId=" + taskId + ", taskCycle=" + taskCycle
 				+ ", countBlock=" + countBlock + ", currentBlockIndex="
-				+ currentBlockIndex + ", blockSize=" + blockSize + "]";
+				+ currentBlockIndex + ", currentBlockSize=" + currentBlockSize
+				+ ", averageBlockSize=" + averageBlockSize + "]";
 	}
 
 }

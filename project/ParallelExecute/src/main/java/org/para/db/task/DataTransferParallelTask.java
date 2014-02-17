@@ -70,11 +70,11 @@ public class DataTransferParallelTask extends ParallelTask<DbSourceJobType> {
 	}
 
 	@Override
-	protected int execute(DbSourceJobType sourceJobObject, int blockSize,
-			int countBlock, int currentBlockIndex) throws Exception {
+	protected int execute(DbSourceJobType sourceJobObject, int currentBlockSize,
+			int countBlock, int currentBlockIndex,int averageBlockSize) throws Exception {
 
 		String exeSelectSql = SQLStringUtil.appendSplitPage(sourceJobObject,
-				blockSize, countBlock, currentBlockIndex);
+				currentBlockSize, countBlock, currentBlockIndex,averageBlockSize);
 
 		// 1-get database resource
 		Connection sourceConnection = null;

@@ -79,12 +79,13 @@ public abstract class DistributedParallelTask implements Runnable, Serializable 
 	@Override
 	public void run() {
 
-		int blockSize = taskProperty.getBlockSize();
+		int averageBlockSize = taskProperty.getAverageBlockSize();
+		int currentBlockSize = taskProperty.getCurrentBlockSize();
 		int countBlock = taskProperty.getCountBlock();
 		int currentBlockIndex = taskProperty.getCurrentBlockIndex();
 		try {
-			this.execute(targetObjectConf, blockSize, countBlock,
-					currentBlockIndex);
+			this.execute(targetObjectConf, currentBlockSize, countBlock,
+					currentBlockIndex,averageBlockSize);
 			countDownLatch.countDown();
 		} catch (Exception runtimeException) {
 			runtimeException.printStackTrace();
@@ -132,7 +133,7 @@ public abstract class DistributedParallelTask implements Runnable, Serializable 
 	 * @throws Exception
 	 */
 	protected abstract int execute(Map<String, String> targetObjectConf,
-			int blockSize, int countBlock, int currentBlockIndex)
+			int currentBlockSize, int countBlock, int currentBlockIndex,int averageBlockSize)
 			throws Exception;
 
 	@Override

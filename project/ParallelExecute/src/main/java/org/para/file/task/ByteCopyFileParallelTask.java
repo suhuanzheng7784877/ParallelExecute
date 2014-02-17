@@ -53,11 +53,11 @@ public class ByteCopyFileParallelTask extends ParallelTask<File> {
 	 * @return
 	 * @throws Exception
 	 */
-	protected int execute(File sourceFile, int blockSize, int countBlock,
-			int currentBlockIndex) throws Exception {
+	protected int execute(File sourceFile, int currentBlockSize, int countBlock,
+			int currentBlockIndex,int averageBlockSize) throws Exception {
 
 		// 取最小的数据块
-		int fileBufferSize = (blockSize < ParaConstant.DefaultFileBufferSize ? blockSize
+		int fileBufferSize = (currentBlockSize < ParaConstant.DefaultFileBufferSize ? currentBlockSize
 				: ParaConstant.DefaultFileBufferSize);
 
 		RandomAccessFile sourceRAF = new RandomAccessFile(sourceFile, "r");
@@ -69,7 +69,7 @@ public class ByteCopyFileParallelTask extends ParallelTask<File> {
 			int readedSize = 0;
 			int readSize = 0;
 			// 读/写，开始的标记
-			int startIndex = currentBlockIndex * blockSize;
+			int startIndex = currentBlockIndex * averageBlockSize;
 
 			sourceRAF.seek(startIndex);
 			targetRaf.seek(startIndex);
@@ -79,7 +79,7 @@ public class ByteCopyFileParallelTask extends ParallelTask<File> {
 				targetRaf.write(contentBytes, 0, readSize);
 				readedSize += readSize;
 
-				if (readedSize >= blockSize) {
+				if (readedSize >= currentBlockSize) {
 					break;
 				}
 				targetRaf.seek(startIndex + readedSize);

@@ -32,10 +32,10 @@ public class StringArrayDistributedParallelTask extends DistributedParallelTask 
 	}
 
 	@Override
-	protected int execute(Map<String, String> targetObjectConf, int blockSize,
-			int countBlock, int currentBlockIndex) throws Exception {
-		int startIndex = currentBlockIndex * blockSize;
-		int endIndex = currentBlockIndex * blockSize + blockSize;
+	protected int execute(Map<String, String> targetObjectConf, int currentBlockSize,
+			int countBlock, int currentBlockIndex,int averageBlockSize) throws Exception {
+		int startIndex = currentBlockIndex * averageBlockSize;
+		int endIndex = currentBlockIndex * averageBlockSize + currentBlockSize;
 
 		try {
 			MessageOutUtil.SystemOutPrint("ThreadId:"
