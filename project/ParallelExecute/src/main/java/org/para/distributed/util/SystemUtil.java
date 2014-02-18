@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -39,8 +39,8 @@ public final class SystemUtil {
 	/**
 	 * 系统的classpath
 	 */
-	private static String java_class_path = System.getProperty(
-			"java.class.path");
+	private static String java_class_path = System
+			.getProperty("java.class.path");
 
 	/**
 	 * 本机node的ip地址
@@ -207,13 +207,17 @@ public final class SystemUtil {
 					Enumeration<NetworkInterface> e1 = NetworkInterface
 							.getNetworkInterfaces();
 					while (e1.hasMoreElements()) {
+
 						NetworkInterface ni = e1.nextElement();
-						if (ni.getName().startsWith("eth0")) {
+
+						if (ni.getName().startsWith("eth0")
+								|| ni.getName().startsWith("eth1")) {
+
 							Enumeration<InetAddress> e2 = ni.getInetAddresses();
 							InetAddress ia = null;
 							while (e2.hasMoreElements()) {
 								ia = e2.nextElement();
-								if (!(ia instanceof Inet6Address)) {
+								if (ia != null && ia instanceof Inet4Address) {
 									localIP = ia.getHostAddress();
 									if (localIP != null
 											&& !"".equals(localIP.trim())) {
@@ -235,7 +239,7 @@ public final class SystemUtil {
 				logger.error("error", e);
 			}
 		}
-
+		logger.info("[local ip is " + localIP + "]");
 		return localIP;
 	}
 

@@ -17,14 +17,17 @@ import org.apache.log4j.Logger;
  * 
  */
 public class StringUtil {
-	
+
 	private static Logger logger = Logger.getLogger(StringUtil.class);
-	
+
 	// 操作系统类型
 	private final static String osType = System.getProperty("os.name");
-	
+
+	private volatile static Boolean isLinuxOS;
+
 	/**
 	 * generate UUID String
+	 * 
 	 * @return
 	 */
 	public static final String generateUUID() {
@@ -33,7 +36,7 @@ public class StringUtil {
 		String uuidString = uuid.toString();
 		return uuidString;
 	}
-	
+
 	/**
 	 * 判断操作系统的类型
 	 * 
@@ -42,19 +45,26 @@ public class StringUtil {
 	 */
 	public static boolean OSisLinux() throws RuntimeException {
 
-		if (StringUtils.isBlank(osType)) {
-			RuntimeException exception = new RuntimeException("osType is null");
-			logger.error("error", exception);
-			throw exception;
-		}
+		if (null == isLinuxOS) {
+			if (StringUtils.isBlank(osType)) {
+				RuntimeException exception = new RuntimeException(
+						"osType is null");
+				logger.error("error", exception);
+				throw exception;
+			}
 
-		if (osType.startsWith("Windows")) {
-			// 按照windows
-			return false;
-		} else {
-			// 按照linux进行
-			return true;
+			if (osType.startsWith("Linux")) {
+				// 按照linux进行
+				isLinuxOS = true;
+			} else {
+				// 按照windows
+				isLinuxOS = false;
+
+			}
+
 		}
+		return isLinuxOS;
+
 	}
 
 }

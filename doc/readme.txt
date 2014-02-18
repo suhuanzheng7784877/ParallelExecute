@@ -17,7 +17,11 @@ ParallelExecute是简单并行任务的框架。
 （待补充，迭代）
 2安装
 从github上下载并行任务框架（https://github.com/suhuanzheng7784877/ParallelExecute）
-进入project\ParallelExecute文件夹，运行ant脚本——build.xml。将编译打包后的路径(.\target\ParallelExecute)配置在系统环境变量PATH中
+进入project\ParallelExecute文件夹，运行ant脚本——build.xml。将编译打包后的路径(.\target\ParallelExecute)配置在系统环境变量PATH中，变量名为PE_HOME
+Windows
+ 
+Linux
+ 
 将编译后lib下的jar包拷贝到业务应用系统的classpath中。
 3简单sample
 客户端只需要继承扩展2个类就可以完成并行任务的工作，之后提交到引擎执行业务逻辑就可以了。
@@ -106,7 +110,7 @@ public class IntParallelTask extends ParallelTask<int[]> {
 }
 Execute方法内部就是执行逻辑，逻辑功能就是该任务线程输出属于它的数组片段（雷同于数据库分页）。
 下面写一个单元测试类，测试一下咱们的并行任务是否能够进行。
-TestIntParallelExecute
+TestIntParallelExecute，并行度（线程数）为3。
 import org.junit.Test;
 import org.para.exception.ParallelException;
 
@@ -147,14 +151,191 @@ job:5517922367113:execute job result [true],countTaskNum=0,successTaskNum=3,erro
 最后一行
 job:5517922367113:execute job result [true],countTaskNum=0,successTaskNum=3,errorTaskNum=0
 代表着整体任务（job）的执行结果。
-
-
-
 分布式sample
+分布式的场景是这样的，从mysql数据库中分别并行读取表中的内容。
+建立一个Java项目，作为ParallelExecute的插件项目。
+首先创建任务入口类MysqlDistributedParallelExecute
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
+import org.para.distributed.master.DistributedParallelExecute;
+import org.para.distributed.task.DistributedParallelTask;
+import org.para.execute.model.TaskProperty;
+import org.para.trace.listener.FailEventListener;
 
+/**
+ * 任务执行逻辑
+ * 
+ * @author liuyan
+ * @Email:suhuanzheng7784877@163.com
+ * @version 0.1
+ * @Date: 2013-12-20 下午7:41:51
+ * @Copyright: 2013 story All rights reserved.
+ * 
+ */
+public class MysqlDistributedParallelExecute extends DistributedParallelExecute {
+
+	@Override
+	protected int analyzeResultCount(Map<String, String> targetObjectConf) {
+
+		String Driver = targetObjectConf.get("Driver");
+		String url = targetObjectConf.get("url");
+		String root = targetObjectConf.get("name");
+		String password = targetObjectConf.get("password");
+		Connection con = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			Class.forName(Driver);
+			con = DriverManager.getConnection(url, root, password);
+			statement = con.createStatement();
+
+			String sql = "SELECT count(*) FROM person";
+			rs = statement.executeQuery(sql);
+			while (rs.next()) {
+				return rs.getInt(1);
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				statement.close();
+				con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return 0;
+	}
+
+	@Override
+	protected DistributedParallelTask buildDistributedParallelTask(
+			CountDownLatch countDownLatch, TaskProperty taskProperty,
+			Map<String, String> targetObjectConf,
+			FailEventListener failEventListener) {
+		MysqlDistributedParallelTask mysqlDistributedParallelTask = new MysqlDistributedParallelTask(
+				countDownLatch, taskProperty, targetObjectConf);
+		return mysqlDistributedParallelTask;
+	}
+
+	@Override
+	protected void init(Map<String, String> arg0) {
+
+	}
+
+}
+同分布式一样此类具备两个重要的功能实现：算出大任务的可量化的总个数；实例化task对象（用于分任务执行）。
+下面编写MysqlDistributedParallelTask，实现每个分任务要执行的业务逻辑。
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
+import org.para.distributed.task.DistributedParallelTask;
+import org.para.execute.model.TaskProperty;
+
+/**
+ * 子任务
+ * 
+ * @author liuyan
+ * @Email:suhuanzheng7784877@163.com
+ * @version 0.1
+ * @Date: 2013-12-20 下午7:41:43
+ * @Copyright: 2013 story All rights reserved.
+ * 
+ */
+public class MysqlDistributedParallelTask extends DistributedParallelTask {
+
+	public MysqlDistributedParallelTask(CountDownLatch countDownLatch,
+			TaskProperty taskProperty, Map<String, String> targetObjectConf) {
+		super();
+		this.countDownLatch = countDownLatch;
+		this.taskProperty = taskProperty;
+		this.targetObjectConf = targetObjectConf;
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	protected int execute(Map<String, String> targetObjectConf, int currentBlockSize,
+			int countBlock, int currentBlockIndex,int averageBlockSize) throws Exception {
+
+		// Class.forName("com.mysql.jdbc.Driver");
+		// String url = "jdbc:mysql://127.0.0.1:3306/test";
+
+		String Driver = targetObjectConf.get("Driver");
+		String url = targetObjectConf.get("url");
+		String root = targetObjectConf.get("name");
+		String password = targetObjectConf.get("password");
+
+		Class.forName(Driver);
+
+		int start = currentBlockIndex * averageBlockSize;
+		Connection con = DriverManager.getConnection(url, root, password);
+		Statement statement = con.createStatement();
+
+		String sql = "SELECT * FROM person LIMIT " + start + "," + currentBlockSize;
+		System.out.println("sql::::" + sql);
+		System.out.println("plugin-version 2 ");
+		ResultSet resultSet = statement.executeQuery(sql);
+
+		while (resultSet.next()) {
+			int id = resultSet.getInt(1);
+			String name = resultSet.getString(2);
+			int mark = resultSet.getInt(3);
+			// System.out.println("[id:" + id + " name:" + name+ " mark:" + mark
+			// + "]");
+		}
+
+		return currentBlockIndex;
+	}
+
+}
+这个业务逻辑也很简单，就仅仅输出数据库中表的内容。
+之后将此插件项目打包成为jar包。
+将插件的jar包，放到一个http服务器上。
+下面启动并行任务的master服务。启动master前先启动memcache以及activemq服务，在setup-soft文件夹下有需要的文件，activemq需要到apache上去下。修改配置文件distributed.properties里的内容，使其和使用者本地配置相同。在windows下为例启动，执行{PE_HOME}/start-master.bat。
+之后在window下启动一个任务结点进程，执行start-slave.bat。
+建立一个应用项目，用于引入动态的并行任务插件，该项目包含并行任务核心jar包——ParallelExecute.jar即可使用并行任务。客户端程序与插件程序可以完全解耦合。
+业务使用程序如下
+	@Test
+	public void test03Http() {
+		// 1
+		String fileAbsolutePathString1 = "http://192.168.137.1/ParalleExecutePlugin2_fat.jar";
+
+		// 2
+		String mainClassName = "distributed.MysqlDistributedParallelExecute";
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("Driver", "com.mysql.jdbc.Driver");
+		map.put("url", "jdbc:mysql://192.168.137.1:3306/test");
+		map.put("name", "root");
+		map.put("password", "111111");
+
+		try {
+			distributedParallelExecuteClient.startDistributedParallelExecute(
+					fileAbsolutePathString1, mainClassName, 3, map);
+		} catch (ParallelException e) {
+			e.printStackTrace();
+		}
+	}
+并行度为3，任务执行结点因为是1个，所以该节点会启动3个进程，对其子任务进行逻辑执行。后续会讲分布式模式的原理。
 4本地模式运行原理
 5分布式模式运行原理
 6任务聚合归并审计
 7任务插件开发
-
