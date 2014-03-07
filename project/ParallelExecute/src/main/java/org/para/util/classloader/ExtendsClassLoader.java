@@ -20,5 +20,14 @@ public class ExtendsClassLoader extends URLClassLoader {
 	public ExtendsClassLoader(URL[] urls) {
 		super(urls);
 	}
+	
+	
+	
+	
+	
+	public static void main(String[] args) {
+		
+		
+	}
 
 }
