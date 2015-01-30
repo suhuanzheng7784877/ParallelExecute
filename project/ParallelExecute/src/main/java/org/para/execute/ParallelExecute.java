@@ -24,6 +24,9 @@ import org.para.util.MessageOutUtil;
  */
 public abstract class ParallelExecute<T extends Serializable> {
 
+	/**
+	 * 并行任务统计计数器
+	 */
 	public CountDownLatch countDownLatch = null;
 
 	/**
@@ -39,7 +42,8 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 */
 	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, parallelism_hint, 0, null, objects);
+		return this.exeParalleJob(sourceObject, parallelism_hint, 0, null,
+				objects);
 	}
 
 	/**
@@ -56,8 +60,8 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 */
 	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			long timeOut, Object... objects) throws ParallelException {
-		return this.exeParalleJob(sourceObject, parallelism_hint, timeOut, null,
-				objects);
+		return this.exeParalleJob(sourceObject, parallelism_hint, timeOut,
+				null, objects);
 	}
 
 	/**
@@ -76,8 +80,8 @@ public abstract class ParallelExecute<T extends Serializable> {
 	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			FailEventListener failEventListener, Object... objects)
 			throws ParallelException {
-		return this.exeParalleJob(sourceObject, parallelism_hint, 0, failEventListener,
-				objects);
+		return this.exeParalleJob(sourceObject, parallelism_hint, 0,
+				failEventListener, objects);
 	}
 
 	/**
@@ -94,34 +98,50 @@ public abstract class ParallelExecute<T extends Serializable> {
 	public JobProperty exeParalleJob(T sourceObject, int parallelism_hint,
 			long timeOut, FailEventListener failEventListener,
 			Object... objects) throws ParallelException {
+
+		// 初始化参数
 		init(sourceObject, objects);
+
+		// 将当前时间设为任务标识id
 		long jobId = System.nanoTime();
-		TaskProperty[] taskPropertyArray = splitJob(sourceObject, parallelism_hint);
+
+		// 将任务进行可度量的分割
+		TaskProperty[] taskPropertyArray = splitJob(sourceObject,
+				parallelism_hint);
+
+		// 建立计数器
 		countDownLatch = new CountDownLatch(taskPropertyArray.length);
+
+		// 执行分任务
 		execute(taskPropertyArray, sourceObject, failEventListener, objects);
 		try {
 
 			if (timeOut > 0) {
+
+				// 具有超时机制的等待
 				countDownLatch.await(timeOut, TimeUnit.SECONDS);
 			} else {
+
+				// 无超时机制的等待
 				countDownLatch.await();
 			}
 		} catch (InterruptedException interruptedException) {
 			throw new ParallelException(interruptedException);
 		}
 
+		// 聚合分任务执行结果集
 		return joinJob(jobId, taskPropertyArray);
 	}
 
 	/**
-	 * init job about some prepare work
+	 * 用于初始化和准备数据 init job about some prepare work
 	 * 
 	 * @param objects
 	 */
 	protected abstract void init(T sourceObject, Object... objects);
 
 	/**
-	 * split big Job to TaskProperty Arrys
+	 * 将任务进行可度量地分割 split big Job to TaskProperty Arrys
 	 * 
 	 * @param targetObject
 	 * @param blockNum
@@ -129,13 +149,14 @@ public abstract class ParallelExecute<T extends Serializable> {
 	 */
 	protected TaskProperty[] splitJob(T srcObject, int blockNum) {
 
-		// count
+		// 分析该任务总共可以度量的总数字：count
 		int resultCount = analyzeResultCount(srcObject);
 
-		// actual block Num
+		// 可分为多少份分任务:actual block Num
 		int currentBlockNum = (blockNum <= 0 ? ParaConstant.DefaultFileBlockNum
 				: blockNum);
 
+		// 平均每一分任务分到的可执行度量数字
 		int averageBlockSize = resultCount / currentBlockNum;
 		int lastBlockSize = averageBlockSize + resultCount % currentBlockNum;
 
@@ -144,12 +165,12 @@ public abstract class ParallelExecute<T extends Serializable> {
 
 			if (i == currentBlockNum - 1) {
 				taskPropertyArray[i] = new TaskProperty(i + 1, resultCount, i,
-						lastBlockSize,averageBlockSize);
+						lastBlockSize, averageBlockSize);
 				break;
 			}
 
 			taskPropertyArray[i] = new TaskProperty(i + 1, resultCount, i,
-					averageBlockSize,averageBlockSize);
+					averageBlockSize, averageBlockSize);
 		}
 
 		return taskPropertyArray;
